@@ -1,0 +1,17 @@
+20250506	15:55:35	d463e8c3-0f29-4f65-b436-577563064a2e	TypeError: fsPromises.readile is not a function
+20250506	18:04:41	3205e542-29eb-44ab-87a1-86b9f0450faa	Error: Not allowed by CORS
+20250507	10:54:05	5ce74419-d7f0-41fe-bd58-232871ffd6c9	ReferenceError: foundUSer is not defined
+20250507	11:44:47	a39439e3-3010-475b-85da-b9be1be1daa8	ReferenceError: otherUsers is not defined
+20250507	11:45:41	14e16053-2088-476e-9788-1db81fad722a	ReferenceError: otherUsers is not defined
+20250507	12:19:14	cb155f31-fc07-4986-b43f-63c2626db031	ReferenceError: allowedRoles is not defined
+20250507	12:23:15	227726bf-73e6-44cb-8a43-7d076fdbdaa6	TypeError: Cannot read properties of undefined (reading 'firstname')
+20250507	12:24:39	b94034d6-1736-497b-a8f9-2be1f3d32dee	TypeError: Cannot read properties of undefined (reading 'firstname')
+20250507	12:26:43	2851fa87-6acb-4ba0-8693-b1fbbe1c5595	TypeError: Cannot read properties of undefined (reading 'firstname')
+20250507	12:29:13	131597c2-6b52-4367-984e-c4fc9c045548	TypeError: Cannot read properties of undefined (reading 'firstname')
+20250507	12:31:07	affa49b9-5a45-44cf-89e2-5277d9e7054d	TypeError: Cannot read properties of undefined (reading 'firstname')
+20250507	12:36:43	71fb7e93-5b17-4f19-bd5d-7fe88cec342a	TypeError: Cannot read properties of undefined (reading 'firstname')
+20250507	12:38:55	e6876178-721e-41be-b85d-62806ecebfa0	TypeError: Cannot read properties of undefined (reading 'firstname')
+20250507	12:48:27	fd699882-f7cb-4557-9c01-6e8e6a825ab1	TypeError: Cannot read properties of undefined (reading 'firstname')
+20250507	12:52:13	106b6511-26c3-4cb2-90a7-6a2df8549198	TypeError: Cannot read properties of undefined (reading 'firstname')
+20250507	12:56:38	98a4bd6d-e41b-41ea-a885-3b4c71f189d6	TypeError: Cannot read properties of undefined (reading 'firstname')
+20250507	13:00:57	d5dd1d88-88b0-4ada-a57e-8038c799a008	TypeError: Cannot read properties of undefined (reading 'firstname')
