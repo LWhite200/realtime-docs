@@ -1,16 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index</title>
-    <link rel="stylesheet" href="css/style.css" />
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/style.css" />
+  <title>Login</title>
 </head>
-
 <body>
-    <h1>Index</h1>
-</body>
+  <h1>Login</h1>
+  <form id="loginForm">
+    <label for="user">Username (walt1):</label>
+    <input type="text" id="user" name="user" required><br><br>
+    <label for="pwd">Password (Aa$12345):</label>
+    <input type="password" id="pwd" name="pwd" required><br><br>
+    <button type="submit">Login</button>
+  </form>
 
+  <button id="testLoginBtn">Login Test</button>
+  <p id="message"></p>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('message');
+    const testLoginBtn = document.getElementById('testLoginBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = form.user.value;
+      const pwd = form.pwd.value;
+
+      try {
+        const res = await fetch('/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user, pwd })
+        });
+
+        if (res.ok) {
+          window.location.href = '/home?success=true';
+        } else {
+          window.location.href = '/index.html?error=1';
+        }
+      } catch (err) {
+        console.error('Login failed', err);
+        msg.textContent = 'Login error. Try again.';
+      }
+    });
+
+    // Login Test Button Behavior
+    testLoginBtn.addEventListener('click', () => {
+      form.user.value = 'walt1';
+      form.pwd.value = 'Aa$12345';
+      form.requestSubmit(); // Triggers form submit programmatically
+    });
+
+    // Handle login error message on reload
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === '1') {
+        msg.style.color = 'red';
+        msg.textContent = 'Login failed. Try again.';
+    }
+  </script>
+</body>
 </html>

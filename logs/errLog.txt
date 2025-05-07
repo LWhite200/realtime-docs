@@ -15,3 +15,18 @@
 20250507	12:52:13	106b6511-26c3-4cb2-90a7-6a2df8549198	TypeError: Cannot read properties of undefined (reading 'firstname')
 20250507	12:56:38	98a4bd6d-e41b-41ea-a885-3b4c71f189d6	TypeError: Cannot read properties of undefined (reading 'firstname')
 20250507	13:00:57	d5dd1d88-88b0-4ada-a57e-8038c799a008	TypeError: Cannot read properties of undefined (reading 'firstname')
+20250507	15:08:59	a8480067-65ef-4c2b-870d-8536f666ec4a	Error: ENOENT: no such file or directory, stat 'C:\Users\TriBlackInferno\Downloads\server\public\login.html'
+20250507	15:09:16	5748014c-5faf-46f6-8c25-5864433f6d85	Error: ENOENT: no such file or directory, stat 'C:\Users\TriBlackInferno\Downloads\server\public\login.html'
+20250507	15:09:16	1ba88d1b-4d6a-4ab9-9ba0-60c647eddbfe	Error: ENOENT: no such file or directory, stat 'C:\Users\TriBlackInferno\Downloads\server\public\login.html'
+20250507	15:09:26	43525a31-49fe-4c1c-a65a-44650b3f8ca3	Error: ENOENT: no such file or directory, stat 'C:\Users\TriBlackInferno\Downloads\server\public\login.html'
+20250507	15:09:49	07388faf-e6a6-46f7-94cd-7c22638947a3	Error: ENOENT: no such file or directory, stat 'C:\Users\TriBlackInferno\Downloads\server\public\login.html'
+20250507	15:10:11	5c29f26b-5bbf-413a-9821-7344cb6822d6	Error: ENOENT: no such file or directory, stat 'C:\Users\TriBlackInferno\Downloads\server\public\login.html'
+20250507	15:43:55	4d2eddd8-61bf-4bba-93a1-2b293a6cf8b1	Error: Not allowed by CORS
+20250507	15:44:24	bd2b67eb-ce13-439f-891b-3fd972760afe	Error: Not allowed by CORS
+20250507	15:44:35	e7f22175-f088-46fc-a74a-bea4c65e42c2	Error: Not allowed by CORS
+20250507	15:44:54	09ca2ae3-df45-4f0b-bafc-479d04faea2d	Error: Not allowed by CORS
+20250507	15:45:17	7d9ad99b-3b3f-4663-95d2-055c0c47a76b	Error: Not allowed by CORS
+20250507	15:45:46	e058d175-d833-4e31-bf0d-6ae9941e9b2b	Error: Not allowed by CORS
+20250507	15:50:40	31d67787-6f02-4cbb-9934-ca5fa099dba7	Error: Not allowed by CORS
+20250507	15:50:42	d95efc7a-5592-44ab-9e5a-243a8a10598f	Error: Not allowed by CORS
+20250507	15:52:27	010a38aa-5835-48e8-ba85-c98bae0fe18c	Error: Not allowed by CORS

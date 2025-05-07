@@ -1,0 +1,20 @@
+<!-- views/home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/style.css" />
+  <title>Home</title>
+</head>
+<body>
+  <h1 id="status"></h1>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get('success');
+    const status = document.getElementById('status');
+    status.textContent = success === 'true' ? 'Login successful!' : 'Login unsuccessful.';
+  </script>
+  
+</body>
+</html>

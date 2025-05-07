@@ -59,4 +59,13 @@ app.all(/.*/, (req, res) => {
 app.use(errorHandler);
 
 // Start server
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));  //--- this is purely local host. run with -> [localhost:3500]
+// app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));  // -- this works with lan
+
+// -- How to get server running on your device
+// 1. Download node.js
+// 2. Open up the project folder in visual studio code
+// 3. Open up visual studio code's terminal and "You may not need to" (type npm init -y to initiate packages)
+// 4. Press npm install to download all the packages - you will need to
+// 5. in terminal, type npm dev run -- this will run either on local host or lan depending on config above
