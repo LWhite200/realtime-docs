@@ -1,51 +1,71 @@
 // npm run dev
 // ctrl alt 'down'
 // For the .env -- require('crypto').randomBytes(64).toString('hex')
-const express = require('express');
-const app = express();
-const path = require('path');
-const cors = require('cors');
-const corsOptions = require('./config/corsOptions')
-const { logger } = require('./middleware/logEvents');
-const errorHandler = require('./middleware/errorHandler');
-const verifyJWT = require('./middleware/verifyJWT')
-const cookieParser = require('cookie-parser');
+const express = require('express'); 
+const app = express(); 
+const path = require('path'); 
+const cors = require('cors'); 
+const corsOptions = require('./config/corsOptions'); 
+const { logger } = require('./middleware/logEvents'); 
+const errorHandler = require('./middleware/errorHandler'); 
+const verifyJWT = require('./middleware/verifyJWT'); 
+const cookieParser = require('cookie-parser'); 
 const PORT = process.env.PORT || 3500;
 
-// custom middeware logger, from middleware/logEvents
+// ========== MIDDLEWARE SETUP ========== //
+
+// Custom middleware that logs all incoming requests (from logEvents.js)
+// This helps with debugging and monitoring server activity
 app.use(logger);
 
-// cross origiion resoirce sharing
-// what sites can grab your data
-
-
+// Cross-Origin Resource Sharing (CORS) configuration
+// Determines which external domains can access your API
+// corsOptions contains the whitelist of allowed origins
 app.use(cors(corsOptions));
 
-// middle-ware that handle urlencoded data. 'form data'
+// Middleware to handle URL-encoded form data (like traditional form submissions)
+// extended: false means it uses the querystring library for parsing
 app.use(express.urlencoded({ extended: false }));
 
-//middleware for cookies
+// Middleware to parse cookies attached to incoming requests
+// Needed for features like authentication tokens stored in cookies
 app.use(cookieParser());
 
-// built-in middleware for json
+// Built-in Express middleware to parse JSON data from requests
+// Allows the server to automatically parse JSON request bodies
 app.use(express.json());
 
-// Serve static files, like css and images
+// Serve static files from the 'public' directory (CSS, images, client-side JS)
+// These files are accessible directly from the root URL
 app.use('/', express.static(path.join(__dirname, '/public')));
 
-// roots
-app.use('/', require('./routes/root'));
-app.use('/register', require('./routes/register'));
-app.use('/auth', require('./routes/auth'));
-app.use('/refresh', require('./routes/refresh'));
-app.use('/logout', require('./routes/logout'));
+// ========== ROUTE SETUP ========== //
 
-app.use(verifyJWT); // must verify if they want to gather information
+// Route handlers - these delegate to separate route files for better organization
+app.use('/', require('./routes/root')); // still serves index.html
+
+app.use('/register', require('./routes/register')); // User registration
+app.use('/auth', require('./routes/auth')); // Authentication (login)
+app.use('/refresh', require('./routes/refresh')); // Token refresh endpoint
+app.use('/logout', require('./routes/logout')); // Logout functionality
+
+// ========== PROTECTED ROUTES ========== //
+
+// All routes after this middleware will require JWT verification
+// verifyJWT checks for valid authentication tokens before proceeding
+app.use(verifyJWT);
+app.use('/userData', require('./routes/api/viewUserData'));   // must have json anyways
+
+// Protected API routes (require valid JWT)
 app.use('/employees', require('./routes/api/employees'));
 
-// 404 fallback (must come last)
+// ========== ERROR HANDLING ========== //
+
+// 404 catch-all handler (must come after all other routes)
+// This handles any request that doesn't match defined routes
 app.all(/.*/, (req, res) => {
     res.status(404);
+    // Respond with different content types based on what the client accepts
     if (req.accepts('html')) {
         res.sendFile(path.join(__dirname, 'views', '404.html'));
     } else if (req.accepts('json')) {
@@ -55,15 +75,18 @@ app.all(/.*/, (req, res) => {
     }
 });
 
-// comments 
+// Custom error handler middleware
+// This catches and processes any errors thrown in routes
 app.use(errorHandler);
 
-// Start server
+// ========== SERVER STARTUP ========== //
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));  //--- this is purely local host. run with -> [localhost:3500]
+// Start the server and listen on the specified PORT
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Note: This runs on localhost by default (accessible at http://localhost:3500)
 // app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));  // -- this works with lan
 
-// -- How to get server running on your device
+// -- How to get server running on your device --
 // 1. Download node.js
 // 2. Open up the project folder in visual studio code
 // 3. Open up visual studio code's terminal and "You may not need to" (type npm init -y to initiate packages)

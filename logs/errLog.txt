@@ -30,3 +30,5 @@
 20250507	15:50:40	31d67787-6f02-4cbb-9934-ca5fa099dba7	Error: Not allowed by CORS
 20250507	15:50:42	d95efc7a-5592-44ab-9e5a-243a8a10598f	Error: Not allowed by CORS
 20250507	15:52:27	010a38aa-5835-48e8-ba85-c98bae0fe18c	Error: Not allowed by CORS
+20250509	13:33:24	9fff6e8d-098d-4e2e-be19-9507efd91ea1	TypeError: Cannot read properties of undefined (reading 'join')
+20250509	13:35:43	9f1e481b-42c1-480f-ba20-7a2cccb05c2b	TypeError: Cannot read properties of undefined (reading 'join')

@@ -8,12 +8,12 @@
 </head>
 
 <body>
-  <h1>Login Works</h1>
-  <p>--Client decoded Token--</p>
+  <h1>Token Traversial</h1>
+  <p>--Impliment Server Token Decode--</p>
   <p id="userInfo"> </p>
 
   <!-- Add button to go to home2.html -->
-  <button id="goToHome2Btn">Go to Home2</button>
+  <button id="goToHome2Btn">Go to user edit</button>
 
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
@@ -33,7 +33,7 @@
 
     // Redirect to home2.html when the button is clicked
     goToHome2Btn.addEventListener('click', function() {
-      window.location.href = '/home2'; // Ensure you are using the correct relative path
+      window.location.href = '/edit'; // Ensure you are using the correct relative path
     });
   </script>
 </body>
