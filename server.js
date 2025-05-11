@@ -54,9 +54,8 @@ app.use('/logout', require('./routes/logout')); // Logout functionality
 // All routes after this middleware will require JWT verification
 // verifyJWT checks for valid authentication tokens before proceeding
 app.use(verifyJWT);
-app.use('/userData', require('./routes/api/viewUserData'));   // must have json anyways
-
 // Protected API routes (require valid JWT)
+app.use('/getInfo', require('./routes/api/getInfo'));   
 app.use('/employees', require('./routes/api/employees'));
 
 // ========== ERROR HANDLING ========== //

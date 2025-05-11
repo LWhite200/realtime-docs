@@ -1,4 +1,5 @@
-// instead of google, put the front-end location to connect here.
+// The locations allowed to access our data.
+// Put your ip here when hosting
 const whitelist = [
     'https://www.google.com',
     'http://127.0.0.1:5500',
@@ -6,15 +7,17 @@ const whitelist = [
     'YOUR_IP_HERE' 
 ];
 const corsOptions = {
-    // these 2 origins are not the same, documentation confusing
     origin: (origin, callback) => {
-        if (whitelist.indexOf(origin) !== -1 || !origin) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin || whitelist.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
         }
     },
+    credentials: true,  // REQUIRED for cookies, authorization headers. So much pain figuring this out.
+    allowedHeaders: ['Content-Type', 'Authorization'],
     optionsSuccessStatus: 200
-}
+};
 
 module.exports = corsOptions;

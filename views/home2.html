@@ -1,41 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="css/style.css" />
-  <title>Home</title>
+  <title>JWT Auth Demo</title>
 </head>
-
 <body>
-  <h1>Token Traversial</h1>
-  <p>--Impliment Server Token Decode--</p>
-  <p id="userInfo"> </p>
+  <h1>Server Token Decode</h1>
+  <p id="serverMessage"> </p>
+  <button id="changeUserButton">Change User</button>
 
-  <!-- Add button to go to home2.html -->
-  <button id="goToHome2Btn">Go to user edit</button>
-
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
   <script>
-    const token = localStorage.getItem('accessToken');
-    const userInfoEl = document.getElementById('userInfo');
-    const goToHome2Btn = document.getElementById('goToHome2Btn');
+    const serverMessageEl = document.getElementById('serverMessage');
+    const API_BASE_URL = 'http://localhost:3500';
+    const changeUser = document.getElementById('changeUserButton');
 
-    // Check token and display user info
-    if (token) {
-      const decoded = jwt_decode(token);
-      const username = decoded.UserInfo.username;
-      const roles = decoded.UserInfo.roles;
-      userInfoEl.textContent = `${username}'s roles: ${roles.join(', ')}`;
-    } else {
-      userInfoEl.textContent = 'No access token found. Please log in.';
+    // Button click redirects to /edit
+    changeUser.addEventListener('click', () => {
+      window.location.href = '/edit';
+    });
+
+    // Main function to fetch protected data
+    async function fetchProtectedData() {
+      const token = localStorage.getItem('accessToken');
+
+      let response = await fetch(`${API_BASE_URL}/getInfo`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 403) {
+        const newToken = await refreshToken();
+        if (newToken) {
+          response = await fetch(`${API_BASE_URL}/getInfo`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${newToken}`
+            }
+          });
+        }
+      }
+
+      serverMessageEl.textContent = await response.text();
     }
 
-    // Redirect to home2.html when the button is clicked
-    goToHome2Btn.addEventListener('click', function() {
-      window.location.href = '/edit'; // Ensure you are using the correct relative path
+    async function refreshToken() {
+      const response = await fetch(`${API_BASE_URL}/refresh`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+      
+      const data = await response.json();
+      localStorage.setItem('accessToken', data.accessToken);
+      return data.accessToken;
+    }
+
+    fetchProtectedData().catch(() => {
+      serverMessageEl.textContent = 'Failed to load data';
     });
   </script>
 </body>
-
 </html>
