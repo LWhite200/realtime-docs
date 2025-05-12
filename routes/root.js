@@ -13,6 +13,11 @@ router.get('/home', (req, res) => {
 });
 
 // Serve the home page
+router.get('/registration', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'views', 'registration.html'));
+});
+
+// Serve the home page
 router.get('/home2', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'home2.html'));
 });

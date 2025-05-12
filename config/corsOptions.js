@@ -4,7 +4,7 @@ const whitelist = [
     'https://www.google.com',
     'http://127.0.0.1:5500',
     'http://localhost:3500',
-    'YOUR_IP_HERE' 
+    'http://your_ip'
 ];
 const corsOptions = {
     origin: (origin, callback) => {

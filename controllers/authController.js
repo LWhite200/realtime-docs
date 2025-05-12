@@ -44,7 +44,10 @@ const handleLogin = async (req, res) => {
         );
 
         // testing in scure: true, may need to take out for thunderclient, but need for chrome
+        //------------------------- CORS turn secure to false for lan testing
+        // res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'None', secure: true, maxAge: 24 * 60 * 60 * 1000 });
         res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'None', secure: true, maxAge: 24 * 60 * 60 * 1000 });
+
         res.json({ accessToken });
     } else {
         res.sendStatus(401);

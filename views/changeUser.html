@@ -1,59 +1,211 @@
+<!-- This is crazy -->
+
+<!-- Allows Testing for CRUD functions -->
+<!-- Pseudo database crud, doesn't actually change it -->
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Employee</title>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="css/style.css" />
+  <title>Employee Manager</title>
 </head>
-
 <body>
-    <h1>Update Employee -> does not yet</h1>
-    <form id="updateEmployeeForm">
-        <label for="id">Employee ID:</label>
-        <input type="number" id="id" name="id" required><br><br>
+  <h1>Employee Manager</h1>
+  <label for="mode">Mode:</label>
+  <select id="mode">
+    <option value="createUpdate">Create/Update</option>
+    <option value="read">Read</option>
+    <option value="delete">Delete</option>
+  </select>
 
-        <label for="firstname">First Name:</label>
-        <input type="text" id="firstname" name="firstname" required><br><br>
+  <!-- We cang have 'groups' so we can turn on and off 
+  specific html items when not needed, like name when deleting -->
+  <form id="employeeForm">
+    <div id="idGroup">
+      <label for="id">Employee ID:</label>
+      <input type="number" id="id" name="id" /><br /><br />
+    </div>
 
-        <label for="lastname">Last Name:</label>
-        <input type="text" id="lastname" name="lastname" required><br><br>
+    <!-- Remove when not needed-->
+    <div id="nameGroup">
+      <label for="firstname">First Name:</label>
+      <input type="text" id="firstname" name="firstname" /><br /><br />
 
-        <button type="submit">Update Employee</button>
-    </form>
+      <label for="lastname">Last Name:</label>
+      <input type="text" id="lastname" name="lastname" /><br /><br />
+    </div>
 
-    <script>
-        document.getElementById("updateEmployeeForm").addEventListener("submit", function (e) {
-            e.preventDefault();
+    <button type="submit">Submit</button>
+  </form>
 
-            const id = document.getElementById("id").value;
-            const firstname = document.getElementById("firstname").value;
-            const lastname = document.getElementById("lastname").value;
+  <!-- Modal display, idk how it works exactly -->
+  <div id="employeeModal" style="display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div style="background: rgb(104, 104, 104); margin: 10% auto; padding: 20px; width: 80%; max-width: 600px; position: relative;">
+      <span id="closeModal" style="position: absolute; top: 10px; right: 15px; cursor: pointer;">&times;</span>
+      <h2>Results</h2>
+      <ul id="employeeList"></ul>
+    </div>
+  </div>
 
-            const employeeData = {
-                firstname: firstname,
-                lastname: lastname
-            };
 
-            fetch(`http://localhost:3000/employees/${id}`, {  // Added the employee ID to the URL
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(employeeData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert('Employee updated successfully');
-                console.log(data);
-            })
-            .catch(error => {
-                alert('Error updating employee');
-                console.error(error);
+  <script>
+    /*
+    CRUD for users who have the correct roles.
+
+    Determine what request the user wants,
+    send that request and data to server,
+    get the result json and display,
+    hope the modal works and displays.
+
+    */
+
+    // Get server data and html attributes
+    const API_BASE_URL = 'http://localhost:3500';
+    const form = document.getElementById('employeeForm');
+    const modeSelect = document.getElementById('mode');
+    const idGroup = document.getElementById('idGroup');
+    const nameGroup = document.getElementById('nameGroup');
+    const employeeListEl = document.getElementById('employeeList');
+    const modal = document.getElementById('employeeModal');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    // Turn groups on/off depending on what user's request type
+    function updateFormView() {
+      const mode = modeSelect.value;
+      if (mode === 'createUpdate') {
+        idGroup.style.display = 'block';
+        nameGroup.style.display = 'block';
+      } else if (mode === 'delete') {
+        idGroup.style.display = 'block';
+        nameGroup.style.display = 'none';
+      } else {
+        idGroup.style.display = 'block';
+        nameGroup.style.display = 'none';
+      }
+    }
+
+    modeSelect.addEventListener('change', updateFormView);
+    updateFormView();
+
+    // Listener for request the user submitted
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // First refresh the token before any operations
+      // else they cannot talk to server if expired
+      let token = await refreshToken();
+      if (!token) {
+        alert('Failed to refresh token');
+        return;
+      }
+      localStorage.setItem('accessToken', token);
+
+      // Get the inputs the user made; id, fname, lname
+      const mode = modeSelect.value;
+      const id = document.getElementById('id').value;
+      const firstname = document.getElementById('firstname').value;
+      const lastname = document.getElementById('lastname').value;
+
+      // Try the requests
+      try {
+        if (mode === 'createUpdate') {
+          const exists = await fetch(`${API_BASE_URL}/employees/${id}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (exists.ok) {
+            await fetch(`${API_BASE_URL}/employees`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ id, firstname, lastname })
             });
-        });
-    </script>
-</body>
+          } else {
+            await fetch(`${API_BASE_URL}/employees`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ firstname, lastname })
+            });
+          }
+        } else if (mode === 'delete') {
+          const res = await fetch(`${API_BASE_URL}/employees`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ id })
+          });
+          if (!res.ok) throw new Error('Delete failed');
+        } else if (mode === 'read') {
+          const res = await fetch(id ? `${API_BASE_URL}/employees/${id}` : `${API_BASE_URL}/employees`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await res.json();
+          displayEmployees(Array.isArray(data) ? data : [data]);
+          showModal();
+          return;
+        }
 
+        const response = await fetch(`${API_BASE_URL}/employees`, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const allEmployees = await response.json();
+        displayEmployees(allEmployees);
+        showModal();
+
+      } catch (err) {
+        alert(err.message);
+        console.error(err);
+      }
+    });
+
+    // Display results to a modal so it is visually better than inner html manipulation
+    function displayEmployees(employees) {
+      employeeListEl.innerHTML = '';
+      employees.forEach(emp => {
+        const li = document.createElement('li');
+        li.textContent = `ID: ${emp.id}, Name: ${emp.firstname} ${emp.lastname}`;
+        employeeListEl.appendChild(li);
+      });
+    }
+
+    function showModal() {
+      modal.style.display = 'block';
+    }
+
+    closeModalBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+    window.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+
+    // Refresh user token so they can manage user data
+    async function refreshToken() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/refresh`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        if (!response.ok) throw new Error('Token refresh failed');
+        const data = await response.json();
+        return data.accessToken;
+      } catch (err) {
+        console.error('Token refresh failed:', err);
+        return null;
+      }
+    }
+  </script>
+</body>
 </html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css" />
+    <title>Registration Page</title>
+</head>
+<body>
+    <h1>Register</h1>
+    <form id="registerForm">
+        <label for="user">Username:</label>
+        <input type="text" id="user" name="user" required>
+        
+        <label for="pwd">Password:</label>
+        <input type="password" id="pwd" name="pwd" required>
+        
+        <div class="button-container">
+            <button type="submit">Register</button>
+        </div>
+    </form>
+    
+    <div id="message" class="message" style="display: none;"></div>
+    
+    <div class="login-link">
+        Already have an account? <a href="/">Login here</a>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await registerUser();
+        });
+
+        async function registerUser() {
+            const user = document.getElementById('user').value;
+            const pwd = document.getElementById('pwd').value;
+            
+            const messageDiv = document.getElementById('message');
+            messageDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user, pwd })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    messageDiv.textContent = data.success || 'Registration successful! Redirecting...';
+                    messageDiv.className = 'message success';
+                    messageDiv.style.display = 'block';
+                    
+                    // Redirect to index.html after 2 seconds, or message, this easier
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    messageDiv.textContent = data.message || 'Registration failed';
+                    messageDiv.className = 'message error';
+                    messageDiv.style.display = 'block';
+                }
+            } catch (err) {
+                messageDiv.textContent = 'Network error: ' + err.message;
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

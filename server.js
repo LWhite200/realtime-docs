@@ -44,7 +44,7 @@ app.use('/', express.static(path.join(__dirname, '/public')));
 // Route handlers - these delegate to separate route files for better organization
 app.use('/', require('./routes/root')); // still serves index.html
 
-app.use('/register', require('./routes/register')); // User registration
+app.use('/register', require('./routes/register')); // the actual registration
 app.use('/auth', require('./routes/auth')); // Authentication (login)
 app.use('/refresh', require('./routes/refresh')); // Token refresh endpoint
 app.use('/logout', require('./routes/logout')); // Logout functionality
@@ -83,6 +83,8 @@ app.use(errorHandler);
 // Start the server and listen on the specified PORT
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 // Note: This runs on localhost by default (accessible at http://localhost:3500)
+
+// http://0.0.0.0:3500/
 // app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));  // -- this works with lan
 
 // -- How to get server running on your device --

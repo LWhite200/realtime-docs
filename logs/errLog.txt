@@ -32,3 +32,8 @@
 20250507	15:52:27	010a38aa-5835-48e8-ba85-c98bae0fe18c	Error: Not allowed by CORS
 20250509	13:33:24	9fff6e8d-098d-4e2e-be19-9507efd91ea1	TypeError: Cannot read properties of undefined (reading 'join')
 20250509	13:35:43	9f1e481b-42c1-480f-ba20-7a2cccb05c2b	TypeError: Cannot read properties of undefined (reading 'join')
+20250512	10:17:45	7c602200-f963-4d79-b934-b463ca41d065	Error: Not allowed by CORS
+20250512	10:17:47	d1a83ed8-f90f-4395-95fa-d10656e18f66	Error: Not allowed by CORS
+20250512	11:22:49	ffe8b38e-7772-466f-978d-59d678ffe15c	Error: ENOENT: no such file or directory, stat 'C:\Users\TriBlackInferno\realtime-docs\views\registration.html'
+20250512	11:22:50	8b470ed9-e0c2-4d52-b42d-0e99a53cfe54	Error: ENOENT: no such file or directory, stat 'C:\Users\TriBlackInferno\realtime-docs\views\registration.html'
+20250512	12:43:37	8be63ad2-1bb6-4438-b1e1-055ed22ebd9a	Error: Not allowed by CORS
