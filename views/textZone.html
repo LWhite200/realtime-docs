@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="css/style.css" />
+  <title>User Files</title>
+</head>
+<body>
+
+  <h1>Your Files</h1>
+  <button id="createFileBtn">Create New File</button>
+
+  <ul id="fileList">
+    <li>Loading...</li>
+  </ul>
+
+  <script>
+    const fileList = document.getElementById('fileList');
+    const API_BASE_URL = 'http://localhost:3500';
+
+    async function fetchProtectedData() {
+      const token = localStorage.getItem('accessToken');
+
+      let response = await fetch(`${API_BASE_URL}/getPersonFiles`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      // If token expired, try to refresh it
+      if (response.status === 403) {
+        const newToken = await refreshToken();
+        if (newToken) {
+          response = await fetch(`${API_BASE_URL}/getPersonFiles`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${newToken}`,
+              'Content-Type': 'application/json'
+            }
+          });
+        }
+      }
+
+      const data = await response.json();
+
+      fileList.innerHTML = ''; // Clear existing content
+
+      if (Array.isArray(data)) {
+        if (data.length === 0) {
+          fileList.innerHTML = '<li>No files found.</li>';
+        } else {
+          data.forEach(file => {
+            const li = document.createElement('li');
+            li.textContent = `${file.username}: ${file.fileName}`;
+            fileList.appendChild(li);
+          });
+        }
+      } else {
+        for (const [key, value] of Object.entries(data)) {
+          const li = document.createElement('li');
+          li.textContent = `${key}: ${value}`;
+          fileList.appendChild(li);
+        }
+      }
+    }
+
+    async function refreshToken() {
+      const response = await fetch(`${API_BASE_URL}/refresh`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      localStorage.setItem('accessToken', data.accessToken);
+      return data.accessToken;
+    }
+
+    fetchProtectedData().catch(() => {
+      fileList.innerHTML = '<li>Failed to load data</li>';
+    });
+
+    document.getElementById('createFileBtn').onclick = function () {
+      window.location.href = '/BasicText'; // adjust to your route
+    };
+  </script>
+
+</body>
+</html>

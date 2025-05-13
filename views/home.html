@@ -9,16 +9,27 @@
   <!-- Server Token Decode-->
   <h1 id="welc">Welcome</h1>
   <p id="servMes"> </p>
-  <button id="changeUserButton">Change User</button>
+
+  <div class="button-container">
+    <button id="textZone">Text Zone</button>
+    <button id="changeUserButton">Change User</button>
+  </div>
+
+  
 
   <script>
     const servMesEl = document.getElementById('servMes');
     const API_BASE_URL = 'http://localhost:3500'; // wtf why this i do not know driving me crazy
     const changeUser = document.getElementById('changeUserButton');
+    const textZone = document.getElementById('textZone');
 
     // Button click redirects to /edit
     changeUser.addEventListener('click', () => {
       window.location.href = '/edit';
+    });
+
+    textZone.addEventListener('click', () => {
+      window.location.href = '/textZone';
     });
 
     // This get's the user's name and roles

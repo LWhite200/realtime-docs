@@ -27,4 +27,13 @@ router.get('/edit', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'changeUser.html'));
 });
 
+// Serve the home page
+router.get('/textZone', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'views', 'textZone.html'));
+});
+
+router.get('/BasicText', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'views', 'BasicText.html'));
+});
+
 module.exports = router;
