@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="styles.css">
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text Editor</title>
+
+</head>
+<body>
+
+<div class="navbar">
+    <div class="nav-item">File
+        <div class="dropdown">
+            <div>New</div>
+            <div>Open</div>
+            <div>Save</div>
+            <div>Download</div>
+        </div>
+    </div>
+    <div class="nav-item">Edit
+        <div class="dropdown">
+            <div>Undo</div>
+            <div>Redo</div>
+            <div>Cut</div>
+            <div>Copy</div>
+            <div>Paste</div>
+        </div>
+    </div>
+    <div class="nav-item">View
+        <div class="dropdown">
+            <div>Zoom In</div>
+            <div>Zoom Out</div>
+            <div>Full Screen</div>
+        </div>
+    </div>
+    <div class="nav-item">Insert
+
+        <div class="dropdown">
+            <div>Add Picture</div>
+        </div>
+
+    </div>
+    <div class="nav-item">Format
+
+        <div class="dropdown">
+            <div>Font Style</div>
+        </div>
+
+    </div>
+
+    <div class="nav-item">Help
+
+
+    </div>
+</div>
+
+<div class="toolbar">
+    <button onclick="document.execCommand('bold')"><b>B</b></button>
+    <button onclick="document.execCommand('italic')"><i>I</i></button>
+    <button onclick="document.execCommand('underline')"><u>U</u></button>
+</div>
+
+<div class="editor" contenteditable="true" placeholder="Start typing here...">
+    
+</div>
+
+
+</body>
+</html>
