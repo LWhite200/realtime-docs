@@ -37,3 +37,5 @@
 20250512	11:22:49	ffe8b38e-7772-466f-978d-59d678ffe15c	Error: ENOENT: no such file or directory, stat 'C:\Users\TriBlackInferno\realtime-docs\views\registration.html'
 20250512	11:22:50	8b470ed9-e0c2-4d52-b42d-0e99a53cfe54	Error: ENOENT: no such file or directory, stat 'C:\Users\TriBlackInferno\realtime-docs\views\registration.html'
 20250512	12:43:37	8be63ad2-1bb6-4438-b1e1-055ed22ebd9a	Error: Not allowed by CORS
+20250515	18:49:41	561dc93c-1813-4c85-83b4-ee457c30a300	Error: Not allowed by CORS
+20250515	18:49:42	44d369b0-ef2c-4429-87a1-0f510d5c1c4a	Error: Not allowed by CORS

@@ -19,6 +19,10 @@
         <div onclick="downloadFile()">Download</div>
       </div>
     </div>
+
+    <!-- Hidden file input for Open File -->
+    <input type="file" id="fileInput" accept=".txt,.json" style="display:none">
+
     <div class="nav-item">Edit
       <div class="dropdown">
         <div onclick="document.execCommand('undo')">Undo</div>
@@ -66,8 +70,15 @@
     <button onclick="exportFormattedText()">Export</button>
   </div>
 
+<div >
+  
+   <!-- Title Input -->
+  <input type="text" class="title-box" placeholder="Document Title" />
+  
+</div>
+
   <!-- Editable content area -->
-  <div class="editor" id="editor" contenteditable="true" placeholder="Start typing here..."></div>
+  <div class="editor" id="editor" contenteditable="true"></div>
 
   <!-- Output area to show exported JSON format -->
   <h2>Exported Format</h2>
@@ -167,8 +178,33 @@
       alert("Save not implemented yet.");
     }
 
+    // still need to implement JSON format handling, 
+    // could be used to keep the format of the text rather than just plain
     function openFile() {
-      alert("Open not implemented yet.");
+
+        const fileInput = document.getElementById('fileInput');
+        fileInput.click(); // triggers the hidden file dialog
+
+      fileInput.onchange = () => {
+        const file = fileInput.files[0];
+        
+        if (!file) return;
+
+        // Extract filename without extension
+        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+        document.querySelector('.title-box').value = nameWithoutExt;
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+         const content = e.target.result;
+          // Load file content into your editor 
+          editor.innerText = content
+        };
+
+        reader.readAsText(file);
+      
+      };
     }
 
     // Download editor content as plain text
