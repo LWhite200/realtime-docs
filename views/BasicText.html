@@ -166,20 +166,46 @@
         lines.push(currentLine);
       }
 
+      // visual representation of json style
       output.textContent = JSON.stringify(lines, null, 2);
+
+      //Export as .json file
+      const blob = new Blob([JSON.stringify(lines, null, 2)], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      // Use title input if provided
+      const title = document.querySelector(".title-box").value || "document";
+      a.download = `${title}.json`;
+      a.href = url;
+
+
+       // remove old link if it exists
+      const existing = document.getElementById("downloadJsonLink");
+      if (existing) existing.remove();
+
+      // Set visible text and ID with basic formatting
+      a.textContent = `Download ${title}.json`;
+      a.id = "downloadJsonLink";
+      a.style.display = "inline-block";
+      a.style.marginTop = "10px";
+
+      // Append to the page near output
+      output.parentNode.insertBefore(a, output.nextSibling);
+   
     }
 
     // File options
     function newFile() {
       document.getElementById("editor").innerHTML = "";
+      document.querySelector('.title-box').value = "";
     }
 
     function saveFile() {
       alert("Save not implemented yet.");
     }
 
-    // still need to implement JSON format handling, 
-    // could be used to keep the format of the text rather than just plain
+    // can take plain text (txt) orstyled text (JSON)
     function openFile() {
 
         const fileInput = document.getElementById('fileInput');
@@ -198,14 +224,56 @@
 
         reader.onload = (e) => {
          const content = e.target.result;
-          // Load file content into your editor 
-          editor.innerText = content
+          
+         if(file.name.endsWith(".json"))
+         {
+            try {
+              
+              const parsed = JSON.parse(content);
+              loadStyledContent(parsed);
+
+            } catch(err){
+              alert("Failed to load JSON content.");
+            }
+         }
+         else
+         {
+          //plain text
+          document.getElementById("editor").innerText = content; 
+         }
+  
         };
 
         reader.readAsText(file);
       
       };
     }
+
+    function loadStyledContent(lines) {
+      const editor = document.getElementById("editor");
+      editor.innerHTML = ""; // clear existing content
+
+      lines.forEach(line => {
+        const div = document.createElement("div");
+
+        line.forEach(segment => {
+          const span = document.createElement("span");
+          span.textContent = segment.text;
+
+          const style = segment.style;
+          span.style.color = style.color || "black";
+          span.style.fontWeight = style.bold ? "bold" : "normal";
+          span.style.fontStyle = style.italic ? "italic" : "normal";
+          span.style.textDecoration = style.underline ? "underline" : "none";
+          span.style.fontSize = style.fontSize ? `${style.fontSize}px` : "16px";
+
+          div.appendChild(span);
+        });
+
+        editor.appendChild(div);
+      });
+    }
+
 
     // Download editor content as plain text
     function downloadFile() {
