@@ -85,6 +85,102 @@
   <pre id="output"></pre>
 
   <script>
+    // ---------------
+    // we need to fix this file due to repetativeness with this save
+    function saveFile() {
+      const title = document.querySelector(".title-box").value || "document";
+      const editor = document.getElementById("editor");
+
+      const lines = [];
+      let currentLine = [];
+      let lastStyle = null;
+
+      function extractStyle(el) {
+        const style = window.getComputedStyle(el);
+        return {
+          color: style.color,
+          bold: style.fontWeight === "bold" || parseInt(style.fontWeight) >= 600,
+          italic: style.fontStyle === "italic",
+          underline: style.textDecoration.includes("underline"),
+          fontSize: parseInt(style.fontSize)
+        };
+      }
+
+      function stylesEqual(a, b) {
+        return JSON.stringify(a) === JSON.stringify(b);
+      }
+
+      function pushChunk(text, style) {
+        if (!text) return;
+        if (lastStyle && stylesEqual(lastStyle, style)) {
+          currentLine[currentLine.length - 1].text += text;
+        } else {
+          currentLine.push({ text, style });
+          lastStyle = style;
+        }
+      }
+
+      function flushLine() {
+        lines.push(currentLine);
+        currentLine = [];
+        lastStyle = null;
+      }
+
+      function walk(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent;
+          if (text.trim() !== "" || text.includes(" ")) {
+            const style = extractStyle(node.parentElement || editor);
+            pushChunk(text, style);
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const tag = node.tagName;
+
+          if (tag === "BR") {
+            flushLine();
+          } else {
+            for (const child of node.childNodes) {
+              walk(child);
+            }
+            if (tag === "DIV") {
+              flushLine();
+            }
+          }
+        }
+      }
+
+      for (const node of editor.childNodes) {
+        walk(node);
+      }
+      if (currentLine.length > 0) lines.push(currentLine);
+
+      // Send JSON to the server
+      fetch('/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          content: lines
+        })
+      })
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error("Failed to save document");
+        })
+        .then(data => alert("Document saved successfully!"))
+        .catch(err => {
+          console.error(err);
+          alert("Error saving document.");
+        });
+    }
+    //----------------------------------
+
+
+
+
+
+
+
     // Apply formatting using execCommand
     function setFormat(command, value = null) {
       document.execCommand(command, false, value);
@@ -199,10 +295,6 @@
     function newFile() {
       document.getElementById("editor").innerHTML = "";
       document.querySelector('.title-box').value = "";
-    }
-
-    function saveFile() {
-      alert("Save not implemented yet.");
     }
 
     // can take plain text (txt) orstyled text (JSON)

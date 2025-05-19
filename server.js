@@ -56,7 +56,7 @@ app.use('/logout', require('./routes/logout')); // Logout functionality
 app.use(verifyJWT);
 // Protected API routes (require valid JWT)
 app.use('/getInfo', require('./routes/api/getInfo'));   
-app.use('/getPersonFiles', require('./routes/api/getPersonFiles'));
+app.use('/BasicFiles', require('./routes/api/BasicFiles'));
 app.use('/employees', require('./routes/api/employees'));
 
 // ========== ERROR HANDLING ========== //
@@ -93,4 +93,5 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 // 2. Open up the project folder in visual studio code
 // 3. Open up visual studio code's terminal and "You may not need to" (type npm init -y to initiate packages)
 // 4. Press npm install to download all the packages - you will need to
+// 5. Make file named '.env' and put in the tokens, either you make or from discord not important.
 // 5. in terminal, type npm dev run -- this will run either on local host or lan depending on config above

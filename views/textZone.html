@@ -21,7 +21,7 @@
     async function fetchProtectedData() {
       const token = localStorage.getItem('accessToken');
 
-      let response = await fetch(`${API_BASE_URL}/getPersonFiles`, {
+      let response = await fetch(`${API_BASE_URL}/BasicFiles`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -33,7 +33,7 @@
       if (response.status === 403) {
         const newToken = await refreshToken();
         if (newToken) {
-          response = await fetch(`${API_BASE_URL}/getPersonFiles`, {
+          response = await fetch(`${API_BASE_URL}/BasicFiles`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${newToken}`,

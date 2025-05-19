@@ -1,11 +1,10 @@
-const express = require('express');
-const router = express.Router();
+// BFcontroller.js
 const fs = require('fs');
 const path = require('path');
 
-const userTextsPath = path.join(__dirname, '../../model/userTexts.json');
+const userTextsPath = path.join(__dirname, '../model/userTexts.json');
 
-router.get('/', (req, res) => {
+exports.getAllFiles = (req, res) => {
     fs.readFile(userTextsPath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading userTexts.json:', err);
@@ -20,6 +19,6 @@ router.get('/', (req, res) => {
             res.status(500).json({ message: 'Invalid data format' });
         }
     });
-});
+};
 
-module.exports = router;
+// Add more handlers here like saveFile, deleteFile, etc.

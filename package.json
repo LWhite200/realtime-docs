@@ -9,7 +9,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "nodemon": "^3.1.10"
   },
@@ -22,5 +21,14 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "uuid": "^11.1.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LWhite200/realtime-docs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LWhite200/realtime-docs/issues"
+  },
+  "homepage": "https://github.com/LWhite200/realtime-docs#readme",
+  "description": ""
 }
