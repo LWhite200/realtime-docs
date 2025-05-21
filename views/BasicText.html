@@ -1,11 +1,12 @@
-<!-- Link to custom styles for the editor -->
-<link rel="stylesheet" href="css/stylesText.css" />
+<!-- Add this near the top of your file -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Text Editor</title>
+  <!-- Link to custom styles for the editor -->
+  <link rel="stylesheet" href="css/stylesText.css" />
 </head>
 <body>
 
@@ -83,11 +84,25 @@
   <!-- Output area to show exported JSON format -->
   <h2>Exported Format</h2>
   <pre id="output"></pre>
-
+  
   <script>
+    async function refreshToken() {
+      try {
+        const response = await fetch('/refresh', {
+          method: 'GET',
+          credentials: 'include' // Needed for cookies
+        });
+        if (!response.ok) throw new Error('Token refresh failed');
+        const data = await response.json();
+        return data.accessToken;
+      } catch (err) {
+        console.error('Token refresh failed:', err);
+        return null;
+      }
+    }
     // ---------------
-    // we need to fix this file due to repetativeness with this save
-    function saveFile() {
+    // Consolidated function to get editor content as JSON
+    function getEditorContentAsJson() {
       const title = document.querySelector(".title-box").value || "document";
       const editor = document.getElementById("editor");
 
@@ -121,7 +136,9 @@
       }
 
       function flushLine() {
-        lines.push(currentLine);
+        if (currentLine.length > 0) {
+          lines.push(currentLine);
+        }
         currentLine = [];
         lastStyle = null;
       }
@@ -152,144 +169,84 @@
       for (const node of editor.childNodes) {
         walk(node);
       }
-      if (currentLine.length > 0) lines.push(currentLine);
+      flushLine(); // Ensure last line is added
 
-      // Send JSON to the server
-      fetch('/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          content: lines
-        })
-      })
-        .then(res => {
-          if (res.ok) return res.json();
-          throw new Error("Failed to save document");
-        })
-        .then(data => alert("Document saved successfully!"))
-        .catch(err => {
-          console.error(err);
-          alert("Error saving document.");
+      return {
+        filename: title,
+        content: lines
+      };
+    }
+
+    //-------------------------
+    async function saveFile() {
+      // First refresh the token
+      const token = await refreshToken();
+      if (!token) {
+        alert('Please login again');
+        return;
+      }
+
+      const jsonData = getEditorContentAsJson();
+      
+      try {
+        const response = await fetch('/assets', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // Add auth header
+          },
+          body: JSON.stringify({
+            fileName: jsonData.filename,
+            fileData: jsonData.content
+          })
         });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(error);
+        }
+
+        const data = await response.json();
+        console.log('Save successful:', data);
+        alert(`Document saved as ${data.fileName}`);
+      } catch (err) {
+        console.error('Save failed:', err);
+        alert(`Save failed: ${err.message}`);
+      }
     }
     //----------------------------------
 
-
-
-
-
-
-
-    // Apply formatting using execCommand
-    function setFormat(command, value = null) {
-      document.execCommand(command, false, value);
-    }
-
     // Export editor content to styled JSON
     function exportFormattedText() {
-      const editor = document.getElementById("editor");
       const output = document.getElementById("output");
+      const jsonData = getEditorContentAsJson();
 
-      const lines = [];
-      let currentLine = [];
-      let lastStyle = null;
+      // Visual representation of json style
+      output.textContent = JSON.stringify(jsonData.content, null, 2);
 
-      // Extract text styles from a node
-      function extractStyle(el) {
-        const style = window.getComputedStyle(el);
-        return {
-          color: style.color,
-          bold: style.fontWeight === "bold" || parseInt(style.fontWeight) >= 600,
-          italic: style.fontStyle === "italic",
-          underline: style.textDecoration.includes("underline"),
-          fontSize: parseInt(style.fontSize)
-        };
-      }
-
-      function stylesEqual(a, b) {
-        return JSON.stringify(a) === JSON.stringify(b);
-      }
-
-      // Add text chunk to current line
-      function pushChunk(text, style) {
-        if (!text) return;
-        if (lastStyle && stylesEqual(lastStyle, style)) {
-          currentLine[currentLine.length - 1].text += text;
-        } else {
-          currentLine.push({ text, style });
-          lastStyle = style;
-        }
-      }
-
-      function flushLine() {
-        lines.push(currentLine);
-        currentLine = [];
-        lastStyle = null;
-      }
-
-      // Walk all nodes in editor recursively
-      function walk(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-            const text = node.textContent;
-            if (text.trim() !== "" || text.includes(" ")) {
-            const style = extractStyle(node.parentElement || editor);
-            pushChunk(text, style);
-            }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-            const tag = node.tagName;
-
-            if (tag === "BR") {
-            flushLine(); // New line
-            } else {
-            for (const child of node.childNodes) {
-                walk(child);
-            }
-
-            if (tag === "DIV") {
-                flushLine(); // Treat DIV as paragraph break
-            }
-            }
-        }
-        }
-
-
-      for (const node of editor.childNodes) {
-        walk(node, extractStyle(editor));
-      }
-
-      if (currentLine.length > 0) {
-        lines.push(currentLine);
-      }
-
-      // visual representation of json style
-      output.textContent = JSON.stringify(lines, null, 2);
-
-      //Export as .json file
-      const blob = new Blob([JSON.stringify(lines, null, 2)], { type: "application/json" });
+      // Export as .json file
+      const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: "application/json" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
 
-      // Use title input if provided
-      const title = document.querySelector(".title-box").value || "document";
-      a.download = `${title}.json`;
-      a.href = url;
-
-
-       // remove old link if it exists
+      // Remove old link if it exists
       const existing = document.getElementById("downloadJsonLink");
       if (existing) existing.remove();
 
       // Set visible text and ID with basic formatting
-      a.textContent = `Download ${title}.json`;
+      a.download = `${jsonData.filename}.json`;
+      a.href = url;
+      a.textContent = `Download ${jsonData.filename}.json`;
       a.id = "downloadJsonLink";
       a.style.display = "inline-block";
       a.style.marginTop = "10px";
 
       // Append to the page near output
       output.parentNode.insertBefore(a, output.nextSibling);
-   
     }
+
+    // [Rest of your functions remain the same...]
+
 
     // File options
     function newFile() {
@@ -347,24 +304,23 @@
 
       lines.forEach(line => {
         const div = document.createElement("div");
-
-        line.forEach(segment => {
+        line.forEach(chunk => {
           const span = document.createElement("span");
-          span.textContent = segment.text;
+          span.textContent = chunk.text;
 
-          const style = segment.style;
-          span.style.color = style.color || "black";
-          span.style.fontWeight = style.bold ? "bold" : "normal";
-          span.style.fontStyle = style.italic ? "italic" : "normal";
-          span.style.textDecoration = style.underline ? "underline" : "none";
-          span.style.fontSize = style.fontSize ? `${style.fontSize}px` : "16px";
+          const { color, bold, italic, underline, fontSize } = chunk.style;
+          span.style.color = color;
+          span.style.fontWeight = bold ? "bold" : "normal";
+          span.style.fontStyle = italic ? "italic" : "normal";
+          span.style.textDecoration = underline ? "underline" : "none";
+          span.style.fontSize = fontSize + "px";
 
           div.appendChild(span);
         });
-
         editor.appendChild(div);
       });
     }
+
 
 
     // Download editor content as plain text

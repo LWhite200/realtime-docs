@@ -1,0 +1,24 @@
+[
+  [
+    {
+      "text": "This is crazy ",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": true,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    },
+    {
+      "text": "big purlpe dinorsayur",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ]
+]
