@@ -8,11 +8,14 @@ const assetController = require('../../controllers/assetController');
 
 // Define routes for file operations
 router.route('/')
-    .get(assetController.getAllFiles)       // Get list of files
+    .get(assetController.getAllFiles)        // Get list of files
     .post(assetController.saveOrUpdateFile) // Save or update file
     .delete(assetController.deleteFile);    // Delete a file
 
 router.route('/:fileName')
-    .get(assetController.getFile);          // Get file contents by name
+    .get(assetController.getFile);           // Get file contents by name
+
+// Add this new route for downloading files
+router.get('/download/:fileName', assetController.downloadFile);
 
 module.exports = router;

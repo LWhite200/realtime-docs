@@ -56,7 +56,6 @@ app.use('/logout', require('./routes/logout')); // Logout functionality
 app.use(verifyJWT);
 // Protected API routes (require valid JWT)
 app.use('/getInfo', require('./routes/api/getInfo'));   
-app.use('/BasicFiles', require('./routes/api/BasicFiles'));
 app.use('/assets', require('./routes/api/assets'));
 app.use('/employees', require('./routes/api/employees'));
 

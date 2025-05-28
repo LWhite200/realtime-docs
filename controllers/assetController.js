@@ -35,39 +35,39 @@ const setFileIndex = (data) => {
     fs.writeFileSync(fileIndexPath, JSON.stringify(data, null, 2));
 };
 
-const getAllFiles = (req, res) => {
-    const files = getFileIndex();
-    res.json(files);
-};
-
-const getFile = (req, res) => {
-    const fileName = req.params.fileName;
-    const filePath = path.join(filesDir, `${fileName}.json`);
-
-    if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ message: 'File not found' });
-    }
-
-    const content = fs.readFileSync(filePath, 'utf-8');
-    res.json({ fileName, content: JSON.parse(content) });
-};
-
 const saveOrUpdateFile = (req, res) => {
     console.log('Incoming request to save file');
     console.log('Request body:', req.body);
-    
+
+    const username = req.user;
+    if (!username) {
+        return res.status(400).json({ error: 'Missing user context' });
+    }
+
+    const userDir = path.join(filesDir, username);
+
+    // Ensure user directory exists
+    if (!fs.existsSync(userDir)) {
+        try {
+            fs.mkdirSync(userDir, { recursive: true });
+            console.log(`Created user directory: ${userDir}`);
+        } catch (err) {
+            console.error(`Could not create user directory ${userDir}:`, err);
+            return res.status(500).json({ error: 'Failed to create user directory' });
+        }
+    }
+
     try {
         const { fileName, fileData } = req.body;
 
         if (!fileName || !fileData) {
-            console.log('Validation failed - missing fileName or fileData');
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: 'fileName and fileData are required',
                 received: req.body
             });
         }
 
-        const filePath = path.join(filesDir, `${fileName}.json`);
+        const filePath = path.join(userDir, `${fileName}.json`);
         console.log('Saving to:', filePath);
 
         fs.writeFileSync(filePath, JSON.stringify(fileData, null, 2));
@@ -75,11 +75,12 @@ const saveOrUpdateFile = (req, res) => {
 
         // Update index
         const fileIndex = getFileIndex();
-        const existingIndex = fileIndex.findIndex(f => f.fileName === fileName);
-        
+        const indexKey = `${username}/${fileName}`;
+        const existingIndex = fileIndex.findIndex(f => f.fileName === indexKey);
+
         if (existingIndex === -1) {
             fileIndex.push({
-                fileName,
+                fileName: indexKey,
                 savedAt: new Date().toISOString(),
                 size: JSON.stringify(fileData).length
             });
@@ -108,27 +109,77 @@ const saveOrUpdateFile = (req, res) => {
     }
 };
 
+
+const getFile = (req, res) => {
+    const username = req.user;
+    const fileName = req.params.fileName;
+    const userFilePath = path.join(filesDir, username, `${fileName}.json`);
+
+    if (!fs.existsSync(userFilePath)) {
+        return res.status(404).json({ message: 'File not found' });
+    }
+
+    const content = fs.readFileSync(userFilePath, 'utf-8');
+    res.json({ fileName, content: JSON.parse(content) });
+};
+
 const deleteFile = (req, res) => {
+    const username = req.user;
     const { fileName } = req.body;
 
     if (!fileName) return res.status(400).json({ message: 'fileName is required' });
 
-    const filePath = path.join(filesDir, `${fileName}.json`);
+    const filePath = path.join(filesDir, username, `${fileName}.json`);
     if (!fs.existsSync(filePath)) {
         return res.status(404).json({ message: 'File not found' });
     }
 
     fs.unlinkSync(filePath);
 
-    const fileIndex = getFileIndex().filter(f => f.fileName !== fileName);
+    const fileIndex = getFileIndex().filter(f => f.fileName !== `${username}/${fileName}`);
     setFileIndex(fileIndex);
 
     res.json({ message: 'File deleted successfully' });
 };
 
+const downloadFile = (req, res) => {
+    const username = req.user;
+    const { fileName } = req.params;
+
+    if (!fileName) return res.status(400).json({ message: 'fileName is required' });
+
+    const filePath = path.join(filesDir, username, `${fileName}.json`);
+
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: 'File not found' });
+    }
+
+    // Set headers to prompt download
+    res.download(filePath, `${fileName}.json`, (err) => {
+        if (err) {
+            console.error('Error sending file:', err);
+            if (!res.headersSent) {
+                res.status(500).json({ message: 'Error downloading file' });
+            }
+        }
+    });
+};
+
+
+const getAllFiles = (req, res) => {
+    const username = req.user;
+    const files = getFileIndex()
+        .filter(f => f.fileName.startsWith(`${username}/`))
+        .map(f => f.fileName.replace(`${username}/`, ''));  // strip username prefix
+    res.json(files);
+};
+
+
+
 module.exports = {
     getAllFiles,
     getFile,
     saveOrUpdateFile,
+    downloadFile, 
     deleteFile
 };

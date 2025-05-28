@@ -135,13 +135,21 @@
         }
       }
 
+      // Weird, needed for the spaces and indentations
       function flushLine() {
         if (currentLine.length > 0) {
           lines.push(currentLine);
+        } else {
+          // Detect if the line contained only whitespace
+          const whitespaceLine = editor.innerHTML.split(/<div>|<br>/).some(div => /^\s+$/.test(div));
+          lines.push(whitespaceLine ? [{ text: " ", style: extractStyle(editor) }] : []);
         }
         currentLine = [];
         lastStyle = null;
       }
+
+
+
 
       function walk(node) {
         if (node.nodeType === Node.TEXT_NODE) {
@@ -208,7 +216,7 @@
 
         const data = await response.json();
         console.log('Save successful:', data);
-        alert(`Document saved as ${data.fileName}`);
+        alert(`Document saved as ${jsonData.filename}`);
       } catch (err) {
         console.error('Save failed:', err);
         alert(`Save failed: ${err.message}`);
@@ -304,22 +312,27 @@
 
       lines.forEach(line => {
         const div = document.createElement("div");
-        line.forEach(chunk => {
-          const span = document.createElement("span");
-          span.textContent = chunk.text;
+        if (line.length === 0) {
+          div.innerHTML = "&nbsp;"; // preserves line height for visually empty line
+        } else {
+          line.forEach(chunk => {
+            const span = document.createElement("span");
+            span.textContent = chunk.text;
 
-          const { color, bold, italic, underline, fontSize } = chunk.style;
-          span.style.color = color;
-          span.style.fontWeight = bold ? "bold" : "normal";
-          span.style.fontStyle = italic ? "italic" : "normal";
-          span.style.textDecoration = underline ? "underline" : "none";
-          span.style.fontSize = fontSize + "px";
+            const { color, bold, italic, underline, fontSize } = chunk.style;
+            span.style.color = color;
+            span.style.fontWeight = bold ? "bold" : "normal";
+            span.style.fontStyle = italic ? "italic" : "normal";
+            span.style.textDecoration = underline ? "underline" : "none";
+            span.style.fontSize = fontSize + "px";
 
-          div.appendChild(span);
-        });
+            div.appendChild(span);
+          });
+        }
         editor.appendChild(div);
       });
     }
+
 
 
 
@@ -379,6 +392,56 @@
         document.querySelector(`button[data-command="${cmd}"]`)?.classList.toggle("active", state);
       });
     }
+
+
+
+    // Helper: Get query parameter by name
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    // Load file content from server by filename
+    async function loadFileFromServer(fileName) {
+      try {
+        // Make authenticated request (adjust token handling as needed)
+        const token = await refreshToken();
+        if (!token) {
+          alert('Please login again');
+          return;
+        }
+
+        const response = await fetch(`/assets/${fileName}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file: ${response.statusText}`);
+        }
+
+        const { fileName: returnedFileName, content } = await response.json();
+
+        // Set title input
+        document.querySelector('.title-box').value = returnedFileName;
+
+        // Load content into editor
+        loadStyledContent(content);
+      } catch (err) {
+        console.error('Error loading file:', err);
+        alert(`Error loading file: ${err.message}`);
+      }
+    }
+
+    // On page load, check if there's a ?file= query and load that file
+    window.addEventListener('DOMContentLoaded', () => {
+      const fileName = getQueryParam('file');
+      if (fileName) {
+        loadFileFromServer(fileName);
+      }
+    });
+
   </script>
 </body>
 </html>

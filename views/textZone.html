@@ -3,7 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="stylesheet" href="css/style.css" />
-  <title>User Files</title>
+  <title>Your Files</title>
+  <style>
+    ul#fileList {
+      list-style-type: none;
+      padding: 0;
+      max-width: 600px;
+    }
+    ul#fileList li {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #ccc;
+    }
+    ul#fileList li a {
+      flex-grow: 1;
+      text-decoration: none;
+      color: #007bff;
+      font-weight: 500;
+    }
+    ul#fileList li button {
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
@@ -18,10 +43,10 @@
     const fileList = document.getElementById('fileList');
     const API_BASE_URL = 'http://localhost:3500';
 
-    async function fetchProtectedData() {
+    async function fetchFiles() {
       const token = localStorage.getItem('accessToken');
 
-      let response = await fetch(`${API_BASE_URL}/BasicFiles`, {
+      let response = await fetch(`${API_BASE_URL}/assets`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -29,11 +54,10 @@
         }
       });
 
-      // If token expired, try to refresh it
       if (response.status === 403) {
         const newToken = await refreshToken();
         if (newToken) {
-          response = await fetch(`${API_BASE_URL}/BasicFiles`, {
+          response = await fetch(`${API_BASE_URL}/assets`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${newToken}`,
@@ -43,26 +67,114 @@
         }
       }
 
+      if (!response.ok) {
+        fileList.innerHTML = `<li>Failed to load files: ${response.status} ${response.statusText}</li>`;
+        return;
+      }
+
       const data = await response.json();
 
-      fileList.innerHTML = ''; // Clear existing content
+      fileList.innerHTML = '';
 
-      if (Array.isArray(data)) {
-        if (data.length === 0) {
-          fileList.innerHTML = '<li>No files found.</li>';
-        } else {
-          data.forEach(file => {
-            const li = document.createElement('li');
-            li.textContent = `${file.username}: ${file.fileName}`;
-            fileList.appendChild(li);
+      if (!Array.isArray(data) || data.length === 0) {
+        fileList.innerHTML = '<li>No files found.</li>';
+        return;
+      }
+
+      // Ensure unique file names and correct count
+      const uniqueFiles = [...new Set(data)];
+
+      uniqueFiles.forEach(fileName => {
+        const li = document.createElement('li');
+
+        // Filename link
+        const link = document.createElement('a');
+        link.href = `/BasicText?file=${encodeURIComponent(fileName)}`;
+        link.textContent = fileName;
+        li.appendChild(link);
+
+        // Download button
+        const downloadBtn = document.createElement('button');
+        downloadBtn.textContent = 'Download';
+        downloadBtn.type = 'button';
+        downloadBtn.onclick = async (e) => {
+          e.preventDefault();
+          await downloadFile(fileName);
+        };
+        li.appendChild(downloadBtn);
+
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.type = 'button';
+        deleteBtn.onclick = async (e) => {
+          e.preventDefault();
+          if (confirm(`Delete file "${fileName}"?`)) {
+            await deleteFile(fileName);
+            fetchFiles();
+          }
+        };
+        li.appendChild(deleteBtn);
+
+        fileList.appendChild(li);
+      });
+    }
+
+    async function downloadFile(fileName) {
+      const token = localStorage.getItem('accessToken');
+      const url = `${API_BASE_URL}/assets/${encodeURIComponent(fileName)}`;
+      let response = await fetch(url, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.status === 403) {
+        const newToken = await refreshToken();
+        if (newToken) {
+          response = await fetch(url, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${newToken}` }
           });
         }
-      } else {
-        for (const [key, value] of Object.entries(data)) {
-          const li = document.createElement('li');
-          li.textContent = `${key}: ${value}`;
-          fileList.appendChild(li);
+      }
+
+      if (!response.ok) {
+        alert(`Failed to download file: ${response.status} ${response.statusText}`);
+        return;
+      }
+
+      const json = await response.json();
+      const contentStr = JSON.stringify(json.content, null, 2);
+      const blob = new Blob([contentStr], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${fileName}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    async function deleteFile(fileName) {
+      const token = localStorage.getItem('accessToken');
+
+      const response = await fetch(`${API_BASE_URL}/assets`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ fileName })
+      });
+
+      if (response.status === 403) {
+        const newToken = await refreshToken();
+        if (newToken) {
+          return await deleteFile(fileName);
         }
+      }
+
+      if (!response.ok) {
+        alert(`Failed to delete file: ${response.status} ${response.statusText}`);
       }
     }
 
@@ -72,17 +184,23 @@
         credentials: 'include'
       });
 
+      if (!response.ok) {
+        alert('Session expired. Please login again.');
+        window.location.href = '/login';
+        return null;
+      }
+
       const data = await response.json();
       localStorage.setItem('accessToken', data.accessToken);
       return data.accessToken;
     }
 
-    fetchProtectedData().catch(() => {
+    fetchFiles().catch(() => {
       fileList.innerHTML = '<li>Failed to load data</li>';
     });
 
     document.getElementById('createFileBtn').onclick = function () {
-      window.location.href = '/BasicText'; // adjust to your route
+      window.location.href = '/BasicText';
     };
   </script>
 
