@@ -24,6 +24,9 @@
     <!-- Hidden file input for Open File -->
     <input type="file" id="fileInput" accept=".txt,.json" style="display:none">
 
+    <!-- Hidden file input for Insert Pic -->
+    <input type="file" id="picFileInput" accept=".jpg,.jpeg,.png" style="display:none">
+
     <div class="nav-item">Edit
       <div class="dropdown">
         <div onclick="document.execCommand('undo')">Undo</div>
@@ -69,6 +72,19 @@
     <button data-command="fontSize" data-value="4">Large</button>
     <button data-command="fontSize" data-value="2">Normal</button>
     <button onclick="exportFormattedText()">Export</button>
+
+    <!--picture size change WIP -->
+    <label for="imgSizeDropdown">Image Size:</label>
+       <select id="imgSizeDropdown" onchange="applySelectedImageSize()">
+      <option value="">Select size</option>
+      <option value="25%">25%</option>
+      <option value="50%">50%</option>
+      <option value="75%">75%</option>
+      <option value="100%">100%</option>
+      <option value="custom">Custom</option>
+      </select>
+      <input type="text" id="customImgSize" placeholder="Custom size (e.g. 60%)" style="display: none;" oninput="applySelectedImageSize()">
+
   </div>
 
 <div >
@@ -364,7 +380,51 @@
     }
 
     function addPicture() {
-      alert("Add picture not implemented yet.");
+    
+      const fileInput = document.getElementById('picFileInput');
+      fileInput.click(); // triggers the hidden file dialog
+
+      fileInput.onchange = () => {
+        const file = fileInput.files[0];
+        
+        if (!file) return;
+      
+
+      const reader = new FileReader();
+
+        reader.onload = (e) => {
+         const content = e.target.result;
+        
+
+        //create <img> tag
+        const img = document.createElement("img");
+        img.src = content;
+        img.style.maxWidth = "20%"; // Prevent images from overflowing
+
+        // Focus the editor before inserting the image
+        const editor = document.getElementById("editor");
+        editor.focus();
+
+        // Insert at the cursor position in the contenteditable editor
+        insertImageAtCursor(img);
+
+        };
+
+        reader.readAsDataURL(file);
+        
+      };
+
+        function insertImageAtCursor(imgElement) 
+        {
+
+          const selection = window.getSelection();
+          if (!selection.rangeCount) return;
+
+          const range = selection.getRangeAt(0);
+          range.deleteContents(); // Remove any selected text
+          range.insertNode(imgElement);
+        }
+
     }
 
     // Toolbar button functionality
