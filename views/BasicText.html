@@ -53,12 +53,18 @@
         <div onclick="setFormat('bold')">Bold</div>
         <div onclick="setFormat('italic')">Italic</div>
         <div onclick="setFormat('underline')">Underline</div>
+        <hr>
+        <div onclick="setFormat('foreColor', 'red')">Red</div>
+        <div onclick="setFormat('foreColor', 'green')">Green</div>
+        <div onclick="setFormat('foreColor', 'yellow')">Yellow</div>
         <div onclick="setFormat('foreColor', 'blue')">Blue</div>
         <div onclick="setFormat('foreColor', 'black')">Black</div>
-        <div onclick="setFormat('fontSize', 4)">Large</div>
-        <div onclick="setFormat('fontSize', 2)">Normal</div>
+        <hr>
+        <div onclick="setFormat('fontSize', 44)">Large</div>
+        <div onclick="setFormat('fontSize', 4)">Normal</div>
       </div>
     </div>
+
     <div class="nav-item">Help</div>
   </div>
 
@@ -67,25 +73,27 @@
     <button data-command="bold"><b>B</b></button>
     <button data-command="italic"><i>I</i></button>
     <button data-command="underline"><u>U</u></button>
+    <button data-command="foreColor" data-value="red">Red</button>
+    <button data-command="foreColor" data-value="green">Green</button>
     <button data-command="foreColor" data-value="blue">Blue</button>
     <button data-command="foreColor" data-value="black">Black</button>
-    <button data-command="fontSize" data-value="4">Large</button>
-    <button data-command="fontSize" data-value="2">Normal</button>
-    <button onclick="exportFormattedText()">Export</button>
+    <button data-command="fontSize" data-value="40">Large</button>
+    <button data-command="fontSize" data-value="3">Normal</button>
+    <button data-command="fontSize" data-value="2">Small</button>
 
-    <!--picture size change WIP -->
+    <!-- Picture size controls -->
     <label for="imgSizeDropdown">Image Size:</label>
-       <select id="imgSizeDropdown" onchange="applySelectedImageSize()">
+    <select id="imgSizeDropdown" onchange="applySelectedImageSize()">
       <option value="">Select size</option>
       <option value="25%">25%</option>
       <option value="50%">50%</option>
       <option value="75%">75%</option>
       <option value="100%">100%</option>
       <option value="custom">Custom</option>
-      </select>
-      <input type="text" id="customImgSize" placeholder="Custom size (e.g. 60%)" style="display: none;" oninput="applySelectedImageSize()">
-
+    </select>
+    <input type="text" id="customImgSize" placeholder="Custom size (e.g. 60%)" style="display: none;" oninput="applySelectedImageSize()">
   </div>
+
 
 <div >
   
@@ -96,10 +104,6 @@
 
   <!-- Editable content area -->
   <div class="editor" id="editor" contenteditable="true"></div>
-
-  <!-- Output area to show exported JSON format -->
-  <h2>Exported Format</h2>
-  <pre id="output"></pre>
   
   <script>
     async function refreshToken() {
@@ -239,38 +243,6 @@
       }
     }
     //----------------------------------
-
-    // Export editor content to styled JSON
-    function exportFormattedText() {
-      const output = document.getElementById("output");
-      const jsonData = getEditorContentAsJson();
-
-      // Visual representation of json style
-      output.textContent = JSON.stringify(jsonData.content, null, 2);
-
-      // Export as .json file
-      const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: "application/json" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-
-      // Remove old link if it exists
-      const existing = document.getElementById("downloadJsonLink");
-      if (existing) existing.remove();
-
-      // Set visible text and ID with basic formatting
-      a.download = `${jsonData.filename}.json`;
-      a.href = url;
-      a.textContent = `Download ${jsonData.filename}.json`;
-      a.id = "downloadJsonLink";
-      a.style.display = "inline-block";
-      a.style.marginTop = "10px";
-
-      // Append to the page near output
-      output.parentNode.insertBefore(a, output.nextSibling);
-    }
-
-    // [Rest of your functions remain the same...]
-
 
     // File options
     function newFile() {

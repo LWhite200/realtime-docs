@@ -12,10 +12,10 @@ router.route('/')
     .post(assetController.saveOrUpdateFile) // Save or update file
     .delete(assetController.deleteFile);    // Delete a file
 
-router.route('/:fileName')
+router.route('/:creator/:fileName')
     .get(assetController.getFile);           // Get file contents by name
 
 // Add this new route for downloading files
-router.get('/download/:fileName', assetController.downloadFile);
+router.get('/download/:creator/:fileName', assetController.downloadFile);
 
 module.exports = router;

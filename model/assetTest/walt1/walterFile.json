@@ -1,0 +1,39 @@
+[
+  [
+    {
+      "text": "This is Walter's file. Edited by Luke. ",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [
+    {
+      "text": "Chuck Berry",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": true,
+        "italic": false,
+        "underline": false,
+        "fontSize": 18
+      }
+    }
+  ],
+  []
+]

@@ -39,3 +39,7 @@
 20250512	12:43:37	8be63ad2-1bb6-4438-b1e1-055ed22ebd9a	Error: Not allowed by CORS
 20250515	18:49:41	561dc93c-1813-4c85-83b4-ee457c30a300	Error: Not allowed by CORS
 20250515	18:49:42	44d369b0-ef2c-4429-87a1-0f510d5c1c4a	Error: Not allowed by CORS
+20250602	16:16:40	4322263b-d95c-421a-8120-af4afcb90ac3	TypeError: getFileIndex(...).filter is not a function
+20250602	16:16:58	3340c9f1-3740-45a9-b5fe-42e4d6e7a709	TypeError: getFileIndex(...).filter is not a function
+20250602	16:24:22	47fd15a2-1282-456d-b8f7-d560b0a493d8	ReferenceError: Cannot access 'fileName' before initialization
+20250602	16:51:56	e3fd6721-7583-4140-b3d5-f657d170aaba	TypeError: The "path" argument must be of type string. Received undefined

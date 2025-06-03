@@ -1,37 +1,31 @@
-[
-  {
-    "fileName": "sdfasfda",
-    "savedAt": "2025-05-21T23:18:56.171Z",
-    "size": 120
+{
+  "luke": {
+    "walterFile": {
+      "creator": "walt1",
+      "dateCreated": "2025-06-02T20:44:26.203Z",
+      "lastModified": "2025-06-02T22:15:10.156Z"
+    },
+    "todo_list": {
+      "creator": "luke",
+      "dateCreated": "2025-06-02T21:08:10.526Z",
+      "lastModified": "2025-06-02T22:10:10.964Z"
+    },
+    "yellow": {
+      "creator": "luke",
+      "dateCreated": "2025-06-02T22:40:57.337Z",
+      "lastModified": "2025-06-02T23:09:53.461Z"
+    }
   },
-  {
-    "fileName": "File1",
-    "savedAt": "2025-05-21T23:29:02.417Z",
-    "size": 1979
-  },
-  {
-    "fileName": "New Day Test",
-    "savedAt": "2025-05-28T10:59:52.453Z",
-    "size": 125
-  },
-  {
-    "fileName": "walt1/walterOne",
-    "savedAt": "2025-05-28T11:02:16.026Z",
-    "size": 130
-  },
-  {
-    "fileName": "walt1/this third",
-    "savedAt": "2025-05-28T11:10:11.562Z",
-    "size": 115
-  },
-  {
-    "fileName": "walt1/NewDoc",
-    "savedAt": "2025-05-28T11:13:34.541Z",
-    "size": 136
-  },
-  {
-    "fileName": "luke/SaveStoreRetreive",
-    "savedAt": "2025-05-28T12:05:33.926Z",
-    "size": 932
+  "walt1": {
+    "walterFile": {
+      "creator": "walt1",
+      "dateCreated": "2025-06-02T20:44:26.203Z",
+      "lastModified": "2025-06-02T22:15:10.156Z"
+    },
+    "todo_list": {
+      "creator": "luke",
+      "dateCreated": "2025-06-02T21:08:10.526Z",
+      "lastModified": "2025-06-02T22:10:10.964Z"
+    }
   }
-]
+}

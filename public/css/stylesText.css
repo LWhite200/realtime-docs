@@ -61,13 +61,15 @@ body {
         .editor {
           padding: 16px;
           min-height: 400px;
+          color: black;
           border: 1px solid #ccc;
           margin: 16px;
           outline: none;
         }
 
         .toolbar button.active {
-  background-color: #444;
-  color: white;
-  border: 1px solid #888;
-}
+          background-color: #444;
+          color: white;
+          border: 1px solid #888;
+        }
+

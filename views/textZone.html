@@ -90,7 +90,8 @@
         // Filename link
         const link = document.createElement('a');
         link.href = `/BasicText?file=${encodeURIComponent(fileName)}`;
-        link.textContent = fileName;
+        file_name = fileName.split("/")
+        link.textContent = `${file_name[1]} [${file_name[0]}]`;
         li.appendChild(link);
 
         // Download button
@@ -101,6 +102,8 @@
           e.preventDefault();
           await downloadFile(fileName);
         };
+        
+        // Check if the user is the same as creator () ${file_name[0]}
         li.appendChild(downloadBtn);
 
         // Delete button
@@ -121,62 +124,84 @@
     }
 
     async function downloadFile(fileName) {
-      const token = localStorage.getItem('accessToken');
-      const url = `${API_BASE_URL}/assets/${encodeURIComponent(fileName)}`;
-      let response = await fetch(url, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.status === 403) {
-        const newToken = await refreshToken();
-        if (newToken) {
-          response = await fetch(url, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${newToken}` }
+      try {
+          const token = localStorage.getItem('accessToken');
+          const [creator, actualFileName] = fileName.split('/');
+          
+          // Use the new route format
+          const url = `${API_BASE_URL}/assets/download/${encodeURIComponent(creator)}/${encodeURIComponent(actualFileName)}`;
+          
+          const response = await fetch(url, {
+              method: 'GET',
+              headers: { 
+                  'Authorization': `Bearer ${token}`,
+                  'Accept': 'application/json'
+              }
           });
-        }
-      }
 
-      if (!response.ok) {
-        alert(`Failed to download file: ${response.status} ${response.statusText}`);
-        return;
-      }
+          if (response.status === 403) {
+              const newToken = await refreshToken();
+              if (newToken) {
+                  return downloadFile(fileName); // Retry with new token
+              }
+              throw new Error('Session expired');
+          }
 
-      const json = await response.json();
-      const contentStr = JSON.stringify(json.content, null, 2);
-      const blob = new Blob([contentStr], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `${fileName}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
+          if (!response.ok) {
+              throw new Error(`Failed to download: ${response.statusText}`);
+          }
+
+          // Get the filename from content-disposition header
+          const contentDisposition = response.headers.get('content-disposition');
+          const downloadName = contentDisposition 
+              ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+              : `${actualFileName}.json`;
+
+          // Handle the file download
+          const blob = await response.blob();
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = downloadName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+      } catch (error) {
+          console.error('Download error:', error);
+          alert(`Download failed: ${error.message}`);
+      }
+  }
 
     async function deleteFile(fileName) {
       const token = localStorage.getItem('accessToken');
+      
+      try {
+          const response = await fetch(`${API_BASE_URL}/assets`, {
+              method: 'DELETE',
+              headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ fileName })
+          });
 
-      const response = await fetch(`${API_BASE_URL}/assets`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ fileName })
-      });
+          if (response.status === 403) {
+              const errorData = await response.json();
+              alert(`Delete failed: ${errorData.message}`);
+              return false;
+          }
 
-      if (response.status === 403) {
-        const newToken = await refreshToken();
-        if (newToken) {
-          return await deleteFile(fileName);
-        }
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          return true;
+      } catch (error) {
+          console.error('Delete error:', error);
+          alert('Failed to delete file. Please try again.');
+          return false;
       }
-
-      if (!response.ok) {
-        alert(`Failed to delete file: ${response.status} ${response.statusText}`);
-      }
-    }
+  }
 
     async function refreshToken() {
       const response = await fetch(`${API_BASE_URL}/refresh`, {
