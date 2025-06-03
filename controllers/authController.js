@@ -1,3 +1,6 @@
+//----------------------------------------------------------
+// Constant and required information
+
 const usersDB = {
     users: require('../model/users.json'),
     setUsers: function (data) { this.users = data }
@@ -9,6 +12,11 @@ require('dotenv').config();
 const fsPromises = require('fs').promises;
 const path = require('path');
 
+
+//----------------------------------------------------------------------
+// Check if the username and password are within the database
+// Construct unique authentification and refresh tokens and pass to client
+// auth token = (encrypted code),username,roles
 const handleLogin = async (req, res) => {
     const { user, pwd } = req.body;
     if (!user || !pwd) return res.status(400).json({ 'message': 'Username and password are required.' });

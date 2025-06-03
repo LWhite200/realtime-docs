@@ -8,15 +8,20 @@
 <body>
   <h1>Login</h1>
   <form id="loginForm">
-    <label for="user">Username (walt1):</label>
+    <label for="user">Username:</label>
     <input type="text" id="user" name="user" required><br><br>
-    <label for="pwd">Password (Aa$12345):</label>
+    <label for="pwd">Password:</label>
     <input type="password" id="pwd" name="pwd" required><br><br>
 
     <div class="button-container">
-      <button type="submit">Login</button>
-      <button id="testLoginBtn">Login Test</button>
-      <button id="regBtn">Register</button>
+      <div>
+        <button type="submit">Login</button>
+        <button id="regBtn">Register</button>
+      </div>
+      <div>
+        <button id="testLoginBtn">Admin</button>
+        <button id="testLoginBtn2">Normal</button>
+      </div>
     </div>
   </form>
 
@@ -27,6 +32,7 @@
     const form = document.getElementById('loginForm');
     const msg = document.getElementById('message');
     const testLoginBtn = document.getElementById('testLoginBtn');
+    const testLoginBtn2 = document.getElementById('testLoginBtn2');
     const regBtn = document.getElementById('regBtn');
 
     form.addEventListener('submit', async (e) => {
@@ -66,6 +72,11 @@
     testLoginBtn.addEventListener('click', () => {
       form.user.value = 'walt1';
       form.pwd.value = 'Aa$12345';
+      form.requestSubmit(); // Triggers form submit programmatically
+    });
+    testLoginBtn2.addEventListener('click', () => {
+      form.user.value = 'luke';
+      form.pwd.value = 'luke';
       form.requestSubmit(); // Triggers form submit programmatically
     });
 

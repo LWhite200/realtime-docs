@@ -99,7 +99,7 @@
   ],
   [
     {
-      "text": "6. Changing and setting file name (kind of weird)",
+      "text": "6. Changing and setting file name (kind of weird), probably in textZone when no one is accessing it idk?",
       "style": {
         "color": "rgb(0, 0, 0)",
         "bold": false,
@@ -223,7 +223,6 @@
   ],
   [],
   [],
-  [],
   [
     {
       "text": "---Custom note pages (maps, graphs, notecards)---",
@@ -285,9 +284,65 @@
     }
   ],
   [],
-  [],
-  [],
-  [],
-  [],
+  [
+    {
+      "text": "---Server Improvements---",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": true,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "1. 404 not found html",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "2. Cannot traverse pages if not logged in (verify)",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "3. reloading pages if you go 'go back' and then verify they are properly logged in.",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "4. Helper JS files in public? May not work due to security or chatgpt is dumb.",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
   []
 ]

@@ -39,29 +39,32 @@ app.use(express.json());
 // These files are accessible directly from the root URL
 app.use('/', express.static(path.join(__dirname, '/public')));
 
-// ========== ROUTE SETUP ========== //
 
-// Route handlers - these delegate to separate route files for better organization
-app.use('/', require('./routes/root')); // still serves index.html
 
-app.use('/register', require('./routes/register')); // the actual registration
-app.use('/auth', require('./routes/auth')); // Authentication (login)
-app.use('/refresh', require('./routes/refresh')); // Token refresh endpoint
-app.use('/logout', require('./routes/logout')); // Logout functionality
+// --------------------------------------------------------------------
+// Request routing ----------------------------------------------------
 
-// ========== PROTECTED ROUTES ========== //
+// HTML file requests, do not know why it works, but does.
+app.use('/', require('./routes/root')); 
 
-// All routes after this middleware will require JWT verification
-// verifyJWT checks for valid authentication tokens before proceeding
-app.use(verifyJWT);
-// Protected API routes (require valid JWT)
-app.use('/getInfo', require('./routes/api/getInfo'));   
-app.use('/assets', require('./routes/api/assets'));
-app.use('/employees', require('./routes/api/employees'));
+// Other basic requests: register, authentication, refresh, logout
+app.use('/register', require('./routes/register'));
+app.use('/auth', require('./routes/auth')); 
+app.use('/refresh', require('./routes/refresh')); 
+app.use('/logout', require('./routes/logout')); 
 
-// ========== ERROR HANDLING ========== //
+// PROTECTED ROUTES that must pass verification before the server handles the request.
+// If verified, request send to the requested 'library' -> /routes/api/employee for employee data
+app.use(verifyJWT); 
+app.use('/getInfo', require('./routes/api/getInfo'));      // Info on each individual person
+app.use('/assets', require('./routes/api/assets'));        // Date files, like json or images for each person
+app.use('/employees', require('./routes/api/employees'));  // data of all individuals in DB
 
-// 404 catch-all handler (must come after all other routes)
+
+
+// --------------------------------------------------------------------
+// Error Handling (authentication blocks it so needs to be fixed) -----
+
 // This handles any request that doesn't match defined routes
 app.all(/.*/, (req, res) => {
     res.status(404);
@@ -75,9 +78,9 @@ app.all(/.*/, (req, res) => {
     }
 });
 
-// Custom error handler middleware
-// This catches and processes any errors thrown in routes
-app.use(errorHandler);
+app.use(errorHandler); // Custom error handler middleware
+
+
 
 // ========== SERVER STARTUP ========== //
 

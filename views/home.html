@@ -10,80 +10,86 @@
   <h1 id="welc">Welcome</h1>
   <p id="servMes"> </p>
 
+  <!-- Buttons -->
   <div class="button-container">
-    <button id="textZone">Text Zone</button>
-    <button id="changeUserButton">Change User</button>
+    <table>
+      <tr>
+        <th><button id="textZoneButton">Text Zone</button></th>
+        <th><button id="manageUsersButton">Manage Users</button></th>
+        <th><button id="customFormatsButton">Custom Formats</button></th>
+      </tr>
+      <tr>
+        <th><button id="programButton">Program</button></th>
+        <th><button id="examplesButton">Examples</button></th>
+        <th><button id="logoutButton">Logout</button></th>
+      </tr>
+    </table>    
   </div>
 
-  
 
+
+  <script src="js/authHelpers.js"></script>
   <script>
     const servMesEl = document.getElementById('servMes');
-    const API_BASE_URL = 'http://localhost:3500'; // wtf why this i do not know driving me crazy
-    const changeUser = document.getElementById('changeUserButton');
-    const textZone = document.getElementById('textZone');
+    const welc = document.getElementById('welc');
 
-    // Button click redirects to /edit
-    changeUser.addEventListener('click', () => {
-      window.location.href = '/edit';
+    const textZone = document.getElementById('textZoneButton');
+    const manageUsers = document.getElementById('manageUsersButton');
+    const customFormats = document.getElementById('customFormatsButton');
+    const program = document.getElementById('programButton');
+    const examples = document.getElementById('examplesButton');
+    const logout = document.getElementById('logoutButton');
+
+    // Force reload on browser back --- logged out or data changed
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {
+        window.location.reload();
+      }
     });
 
+    // Button redirects
     textZone.addEventListener('click', () => {
       window.location.href = '/textZone';
     });
-
-    // This get's the user's name and roles
-    async function fetchProtectedData() {
-
-      // Hope the token was stored successfully
-      const token = localStorage.getItem('accessToken');
-
-      // send to server [/getInfo] with the data
-      let response = await fetch(`${API_BASE_URL}/getInfo`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      // Get new auth token since ours is now bad and not secure
-      // We send the refresh token to get the new authToken JSON
-      if (response.status === 403) {
-        const newToken = await refreshToken();
-        if (newToken) {
-          response = await fetch(`${API_BASE_URL}/getInfo`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${newToken}`
-            }
-          });
-        }
-      }
-
-      // Format the json responce of the info to be prettier
-      const text = await response.text(); 
-      const parts = text.trim().split(/\s+/); 
-      const name = parts[0].replace(/:$/, '!'); 
-      const roles = parts.slice(1).join(' '); 
-      welc.textContent = `Welcome ${name}`;
-      servMesEl.textContent = `Your roles: ${roles}`;
-    }
-
-    async function refreshToken() {
-      const response = await fetch(`${API_BASE_URL}/refresh`, {
+    manageUsers.addEventListener('click', () => {
+      window.location.href = '/edit';
+    });
+    logout.addEventListener('click', async () => {
+      await fetch(`${API_BASE_URL}/logout`, {
         method: 'GET',
         credentials: 'include'
       });
-      
-      const data = await response.json();
-      localStorage.setItem('accessToken', data.accessToken);
-      return data.accessToken;
-    }
-
-    fetchProtectedData().catch(() => {
-      servMesEl.textContent = 'Failed to load data';
+      localStorage.removeItem('accessToken');
+      window.location.href = '/';
     });
+    customFormats.addEventListener('click', () => {
+      window.location.href = '/customFormats';
+    });
+    program.addEventListener('click', () => {
+      window.location.href = '/program';
+    });
+    examples.addEventListener('click', () => {
+      window.location.href = '/examples';
+    });
+
+
+
+    //------------------------------------------
+    // Use fetchProtectedData from authHelpers.js
+    fetchUserLoggedInData()
+      .then(text => {
+        if (text) {
+          const parts = text.trim().split(/\s+/);
+          const name = parts[0].replace(/:$/, '!');
+          const roles = parts.slice(1).join(' ');
+          welc.textContent = `Welcome ${name}`;
+          servMesEl.textContent = `Your roles: ${roles}`;
+        }
+      })
+      .catch(() => {
+        servMesEl.textContent = 'Failed to load data';
+      });
   </script>
+
 </body>
 </html>

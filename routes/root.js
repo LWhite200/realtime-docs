@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 
-
+// any request that is for the index.html, the requests are not always uniform.
 router.get(/^\/$|\/index(.html)?/, (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'index.html'));
 });

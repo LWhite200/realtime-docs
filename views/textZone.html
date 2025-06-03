@@ -35,13 +35,36 @@
   <h1>Your Files</h1>
   <button id="createFileBtn">Create New File</button>
 
-  <ul id="fileList">
-    <li>Loading...</li>
-  </ul>
+  <!-- The file name as link and the creator -->
+  <ul id="fileList"> <li>Loading...</li> </ul>
 
   <script>
     const fileList = document.getElementById('fileList');
     const API_BASE_URL = 'http://localhost:3500';
+
+    // Force reload. Add security like in home so that it verify the user is logged in
+    window.addEventListener('pageshow', async (event) => {
+      if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        // Verify token validity by making a quick authenticated request
+        const response = await fetch(`${API_BASE_URL}/assets`, {
+          method: 'HEAD', 
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.status === 401 || response.status === 403) {
+          window.location.href = 'index.html';
+        } else {
+          window.location.reload();
+        }
+      }
+    });
+
 
     async function fetchFiles() {
       const token = localStorage.getItem('accessToken');
@@ -84,6 +107,7 @@
       // Ensure unique file names and correct count
       const uniqueFiles = [...new Set(data)];
 
+      // For loop begin-------------------
       uniqueFiles.forEach(fileName => {
         const li = document.createElement('li');
 
@@ -102,6 +126,8 @@
           e.preventDefault();
           await downloadFile(fileName);
         };
+        // For loop End-------------------
+        
         
         // Check if the user is the same as creator () ${file_name[0]}
         li.appendChild(downloadBtn);
