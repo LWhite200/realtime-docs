@@ -2,8 +2,8 @@
 // Constant and required information
 
 const usersDB = {
-    users: require('../model/users.json'),
-    setUsers: function (data) { this.users = data }
+    users: require('../model/users.json'),              // path to the user data
+    setUsers: function (data) { this.users = data }     // if the person is in the data
 }
 const bcrypt = require('bcrypt');
 
@@ -18,7 +18,9 @@ const path = require('path');
 // Construct unique authentification and refresh tokens and pass to client
 // auth token = (encrypted code),username,roles
 const handleLogin = async (req, res) => {
-    const { user, pwd } = req.body;
+
+    const { user, pwd } = req.body; // The information passed from the client, split into the 2 aspects
+
     if (!user || !pwd) return res.status(400).json({ 'message': 'Username and password are required.' });
     const foundUser = usersDB.users.find(person => person.username === user);
     if (!foundUser) return res.sendStatus(401); //Unauthorized 

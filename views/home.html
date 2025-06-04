@@ -28,7 +28,7 @@
 
 
 
-  <script src="js/authHelpers.js"></script>
+  <script src="js/authHelper.js"></script>
   <script>
     const servMesEl = document.getElementById('servMes');
     const welc = document.getElementById('welc');
@@ -75,20 +75,34 @@
 
 
     //------------------------------------------
-    // Use fetchProtectedData from authHelpers.js
-    fetchUserLoggedInData()
-      .then(text => {
+    // Uses help from authHelpers.js to send server request
+    // To decode the access token for the name and role of user
+    // This data is secure because they are like the public key,
+    // if perpertrator changes, won't match database, boot them.
+    async function fetchProtectedData() {
+      try {
+        const response = await fetchWithAuth(`${API_BASE_URL}/getInfo`, {
+          method: 'GET'
+        });
+
+        const text = await response.text();
+
         if (text) {
           const parts = text.trim().split(/\s+/);
           const name = parts[0].replace(/:$/, '!');
           const roles = parts.slice(1).join(' ');
           welc.textContent = `Welcome ${name}`;
           servMesEl.textContent = `Your roles: ${roles}`;
+        } else {
+          servMesEl.textContent = 'Failed to load data';
         }
-      })
-      .catch(() => {
+      } catch (err) {
         servMesEl.textContent = 'Failed to load data';
-      });
+      }
+    }
+    fetchProtectedData();
+
+
   </script>
 
 </body>

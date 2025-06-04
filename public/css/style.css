@@ -182,3 +182,129 @@ option {
 .form-group.hidden {
     display: none;
 }
+
+
+
+
+
+
+
+
+/* File List */
+ul#fileList {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+ul#fileList li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 20, 40, 0.3);
+    transition: background 0.2s;
+}
+
+ul#fileList li:hover {
+    background: rgba(0, 20, 40, 0.5);
+}
+
+ul#fileList li a {
+    flex-grow: 1;
+    text-decoration: none;
+    color: #00cfff;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+ul#fileList li a:hover {
+    color: #b4eaff;
+}
+
+ul#fileList li button {
+    padding: 6px 14px;
+    border-radius: 6px;
+    background: #00aaff;
+    color: #fff;
+    border: none;
+    font-size: 16px;
+    transition: background 0.2s;
+}
+
+ul#fileList li button:hover {
+    background: #0077cc;
+}
+
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 10, 20, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+
+.modal-content {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    color: #e6faff;
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.15);
+}
+
+.modal-content h2 {
+    font-size: 28px;
+    margin-bottom: 16px;
+    color: #00e6ff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+#employeeList {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#employeeList li {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #cdefff;
+}
+
+#employeeList li:last-child {
+    border-bottom: none;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    cursor: pointer;
+    color: #66ccff;
+    transition: color 0.2s;
+}
+
+.close-modal:hover {
+    color: #ffffff;
+}

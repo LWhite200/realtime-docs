@@ -3,253 +3,191 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="stylesheet" href="css/style.css" />
-  <title>Your Files</title>
-  <style>
-    ul#fileList {
-      list-style-type: none;
-      padding: 0;
-      max-width: 600px;
-    }
-    ul#fileList li {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 12px;
-      padding: 8px 0;
-      border-bottom: 1px solid #ccc;
-    }
-    ul#fileList li a {
-      flex-grow: 1;
-      text-decoration: none;
-      color: #007bff;
-      font-weight: 500;
-    }
-    ul#fileList li button {
-      padding: 4px 10px;
-      cursor: pointer;
-    }
-  </style>
+  <title>TextZone</title>
 </head>
 <body>
 
   <h1>Your Files</h1>
   <button id="createFileBtn">Create New File</button>
 
-  <!-- The file name as link and the creator -->
-  <ul id="fileList"> <li>Loading...</li> </ul>
+  <ul id="fileList"> <li>Loading...</li> </ul> <!-- The file name as link and the creator -->
 
+  <!-- --- Modal --- -->
+  <div id="optionsModal" class="modal">
+    <div class="modal-content">
+      <h3>File Options</h3>
+      <p id="modalFileName"></p>
+      <button onclick="handleDownload()">Download</button>
+      <button onclick="handleRename()">Rename</button>
+      <button onclick="handleDelete()">Delete</button>
+      <button onclick="handlePermissions()">Permissions</button>
+      <button onclick="handleMakePublic()">Make Public</button>
+      <button onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+
+
+  <script src="js/authHelper.js"></script> <!-- Access to refreshing token and verification -->
   <script>
     const fileList = document.getElementById('fileList');
-    const API_BASE_URL = 'http://localhost:3500';
 
-    // Force reload. Add security like in home so that it verify the user is logged in
+    /*
+      --- Now this file uses the authHelper.js to be more readable and consistent
+      ------ fetchWithAuth handles the authToken and updates that when needed
+      ------ it also handles the messages from server like 401 or 403.
+    */
+
+    //--------------------------------------------------------------------
+    // Refresh to show updated list
     window.addEventListener('pageshow', async (event) => {
       if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-          window.location.href = 'index.html';
+        window.location.reload();
+      }
+    });
+
+    //--------------------------------------------------------------------
+    // List the Files Client can Access
+    async function fetchFiles() {
+      try {
+        const response = await fetchWithAuth(`${API_BASE_URL}/assets`, {
+          method: 'GET'
+        });
+
+        const data = await response.json();
+        fileList.innerHTML = '';
+
+        // Make sure the responce is valid.
+        if (!Array.isArray(data) || data.length === 0) {
+          fileList.innerHTML = '<li>No files found.</li>';
           return;
         }
 
-        // Verify token validity by making a quick authenticated request
-        const response = await fetch(`${API_BASE_URL}/assets`, {
-          method: 'HEAD', 
-          headers: { 'Authorization': `Bearer ${token}` }
+        const uniqueFiles = [...new Set(data)];
+
+        uniqueFiles.forEach(fileName => {
+          const li = document.createElement('li');
+
+          // Link to the file
+          const link = document.createElement('a');
+          link.href = `/BasicText?file=${encodeURIComponent(fileName)}`;
+          const fileParts = fileName.split('/');
+          link.textContent = `${fileParts[1]} [${fileParts[0]}]`;
+          li.appendChild(link);
+
+          // Button for options
+          const optionsBtn = document.createElement('button');
+          optionsBtn.textContent = 'Options';
+          optionsBtn.onclick = () => openModal(fileName);
+          li.appendChild(optionsBtn);
+
+          fileList.appendChild(li);
         });
-
-        if (response.status === 401 || response.status === 403) {
-          window.location.href = 'index.html';
-        } else {
-          window.location.reload();
-        }
+      } catch (error) {
+        fileList.innerHTML = '<li>Failed to load data</li>';
       }
-    });
-
-
-    async function fetchFiles() {
-      const token = localStorage.getItem('accessToken');
-
-      let response = await fetch(`${API_BASE_URL}/assets`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.status === 403) {
-        const newToken = await refreshToken();
-        if (newToken) {
-          response = await fetch(`${API_BASE_URL}/assets`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${newToken}`,
-              'Content-Type': 'application/json'
-            }
-          });
-        }
-      }
-
-      if (!response.ok) {
-        fileList.innerHTML = `<li>Failed to load files: ${response.status} ${response.statusText}</li>`;
-        return;
-      }
-
-      const data = await response.json();
-
-      fileList.innerHTML = '';
-
-      if (!Array.isArray(data) || data.length === 0) {
-        fileList.innerHTML = '<li>No files found.</li>';
-        return;
-      }
-
-      // Ensure unique file names and correct count
-      const uniqueFiles = [...new Set(data)];
-
-      // For loop begin-------------------
-      uniqueFiles.forEach(fileName => {
-        const li = document.createElement('li');
-
-        // Filename link
-        const link = document.createElement('a');
-        link.href = `/BasicText?file=${encodeURIComponent(fileName)}`;
-        file_name = fileName.split("/")
-        link.textContent = `${file_name[1]} [${file_name[0]}]`;
-        li.appendChild(link);
-
-        // Download button
-        const downloadBtn = document.createElement('button');
-        downloadBtn.textContent = 'Download';
-        downloadBtn.type = 'button';
-        downloadBtn.onclick = async (e) => {
-          e.preventDefault();
-          await downloadFile(fileName);
-        };
-        // For loop End-------------------
-        
-        
-        // Check if the user is the same as creator () ${file_name[0]}
-        li.appendChild(downloadBtn);
-
-        // Delete button
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.type = 'button';
-        deleteBtn.onclick = async (e) => {
-          e.preventDefault();
-          if (confirm(`Delete file "${fileName}"?`)) {
-            await deleteFile(fileName);
-            fetchFiles();
-          }
-        };
-        li.appendChild(deleteBtn);
-
-        fileList.appendChild(li);
-      });
     }
+    fetchFiles();
+
 
     async function downloadFile(fileName) {
       try {
-          const token = localStorage.getItem('accessToken');
-          const [creator, actualFileName] = fileName.split('/');
-          
-          // Use the new route format
-          const url = `${API_BASE_URL}/assets/download/${encodeURIComponent(creator)}/${encodeURIComponent(actualFileName)}`;
-          
-          const response = await fetch(url, {
-              method: 'GET',
-              headers: { 
-                  'Authorization': `Bearer ${token}`,
-                  'Accept': 'application/json'
-              }
-          });
+        const [creator, actualFileName] = fileName.split('/');
+        const url = `${API_BASE_URL}/assets/download/${encodeURIComponent(creator)}/${encodeURIComponent(actualFileName)}`;
 
-          if (response.status === 403) {
-              const newToken = await refreshToken();
-              if (newToken) {
-                  return downloadFile(fileName); // Retry with new token
-              }
-              throw new Error('Session expired');
-          }
+        const response = await fetchWithAuth(url, { method: 'GET' });
 
-          if (!response.ok) {
-              throw new Error(`Failed to download: ${response.statusText}`);
-          }
+        if (!response.ok) {
+          throw new Error(`Failed to download: ${response.statusText}`);
+        }
 
-          // Get the filename from content-disposition header
-          const contentDisposition = response.headers.get('content-disposition');
-          const downloadName = contentDisposition 
-              ? contentDisposition.split('filename=')[1].replace(/"/g, '')
-              : `${actualFileName}.json`;
+        const contentDisposition = response.headers.get('content-disposition');
+        const downloadName = contentDisposition
+          ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+          : `${actualFileName}.json`;
 
-          // Handle the file download
-          const blob = await response.blob();
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = downloadName;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-
+        const blob = await response.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = downloadName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       } catch (error) {
-          console.error('Download error:', error);
-          alert(`Download failed: ${error.message}`);
+        console.error('Download error:', error);
+        alert(`Download failed: ${error.message}`);
       }
-  }
-
-    async function deleteFile(fileName) {
-      const token = localStorage.getItem('accessToken');
-      
-      try {
-          const response = await fetch(`${API_BASE_URL}/assets`, {
-              method: 'DELETE',
-              headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ fileName })
-          });
-
-          if (response.status === 403) {
-              const errorData = await response.json();
-              alert(`Delete failed: ${errorData.message}`);
-              return false;
-          }
-
-          if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          return true;
-      } catch (error) {
-          console.error('Delete error:', error);
-          alert('Failed to delete file. Please try again.');
-          return false;
-      }
-  }
-
-    async function refreshToken() {
-      const response = await fetch(`${API_BASE_URL}/refresh`, {
-        method: 'GET',
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        alert('Session expired. Please login again.');
-        window.location.href = '/login';
-        return null;
-      }
-
-      const data = await response.json();
-      localStorage.setItem('accessToken', data.accessToken);
-      return data.accessToken;
     }
 
-    fetchFiles().catch(() => {
-      fileList.innerHTML = '<li>Failed to load data</li>';
-    });
+    
+    //--------------------------------------------------------------
+    // The deletion of a file. Maybe later make it remove from the user's list
+    // --- if they were not the one to create it.
+    async function deleteFile(fileName) {
+      try {
+        const response = await fetchWithAuth(`${API_BASE_URL}/assets`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ fileName })
+        });
 
+        if (!response.ok) {
+          throw new Error(`Delete failed: ${response.statusText}`);
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Delete error:', error);
+        alert('Failed to delete file. Please try again.');
+        return false;
+      }
+    }
+
+
+    //--------------------------------------------------------------
+    // Modal functionality
+    let currentFileName = '';
+
+    function openModal(fileName) {
+      currentFileName = fileName;
+      document.getElementById('modalFileName').textContent = fileName;
+      document.getElementById('optionsModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      currentFileName = '';
+      document.getElementById('optionsModal').style.display = 'none';
+    }
+
+    async function handleDownload() {
+      await downloadFile(currentFileName);
+    }
+
+    async function handleDelete() {
+      if (confirm(`Delete "${currentFileName}"?`)) {
+        await deleteFile(currentFileName);
+        closeModal();
+        fetchFiles();
+      }
+    }
+
+    function handleRename() {
+      alert('Rename feature coming soon...');
+    }
+
+    function handlePermissions() {
+      alert('Permissions feature coming soon...');
+    }
+
+    function handleMakePublic() {
+      alert('Make Public feature coming soon...');
+    }
+
+
+    //--------------------------------------------------------------
+    // The button for BasicText. Simple, do not forget
     document.getElementById('createFileBtn').onclick = function () {
       window.location.href = '/BasicText';
     };
