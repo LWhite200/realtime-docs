@@ -66,6 +66,9 @@
     </div>
 
     <div class="nav-item">Help</div>
+
+    <div onclick="window.location.href = 'textZone'" class="nav-item">Return to File List</div>
+
   </div>
 
   <!-- Toolbar buttons with formatting options -->
@@ -453,8 +456,10 @@
 
         const { fileName: returnedFileName, content } = await response.json();
 
+
+        const fileParts = returnedFileName.split('/');
         // Set title input
-        document.querySelector('.title-box').value = returnedFileName;
+        document.querySelector('.title-box').value = fileParts[1];
 
         // Load content into editor
         loadStyledContent(content);

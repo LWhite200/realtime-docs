@@ -78,7 +78,7 @@
           // Button for options
           const optionsBtn = document.createElement('button');
           optionsBtn.textContent = 'Options';
-          optionsBtn.onclick = () => openModal(fileName);
+          optionsBtn.onclick = () => openModal(fileParts[1]);
           li.appendChild(optionsBtn);
 
           fileList.appendChild(li);
@@ -152,7 +152,7 @@
 
     function openModal(fileName) {
       currentFileName = fileName;
-      document.getElementById('modalFileName').textContent = fileName;
+      document.getElementById('modalFileName').textContent = "File Name: " + fileName;
       document.getElementById('optionsModal').style.display = 'flex';
     }
 
