@@ -94,7 +94,7 @@
       <option value="100%">100%</option>
       <option value="custom">Custom</option>
     </select>
-    <input type="text" id="customImgSize" placeholder="Custom size (e.g. 60%)" style="display: none;" oninput="applySelectedImageSize()">
+    <input type="text" id="customImgSize" placeholder="Custom size (e.g. 60% or 60px)" style="display: none;" oninput="applySelectedImageSize()">
   </div>
 
 
@@ -106,7 +106,53 @@
   <!-- Editable content area -->
   <div class="editor" id="editor" contenteditable="true"></div>
   
+  
   <script>
+
+     let selectedImage = null; // global variable at top
+
+    // Editor image selection
+    document.getElementById("editor").addEventListener("click", (e) => {
+      document.querySelectorAll("#editor img").forEach(img => img.style.outline = "");
+      if (e.target.tagName === "IMG") {
+        selectedImage = e.target;
+        selectedImage.style.outline = "2px dashed #00f";
+      } else {
+        selectedImage = null;
+      }
+    });
+
+
+    // can change size via % or px
+    function applySelectedImageSize() {
+      console.log("Selected image:", selectedImage);
+
+      if (!selectedImage) {
+        alert("Please click on an image to resize it.");
+        return;
+      }
+
+      const dropdown = document.getElementById("imgSizeDropdown");
+      const input = document.getElementById("customImgSize");
+
+      let size = dropdown.value;
+
+      if (size === "custom") {
+        input.style.display = "inline";
+        size = input.value;
+      } else {
+        input.style.display = "none";
+      }
+
+       console.log("Setting width to:", size);
+
+      if (size) {
+        selectedImage.style.maxWidth = "none"; // override existing limit
+        selectedImage.style.width = size;
+        selectedImage.style.height = "auto"; // maintain aspect ratio
+      }
+    }
+
     async function refreshToken() {
       try {
         const response = await fetch('/refresh', {
@@ -372,7 +418,7 @@
         //create <img> tag
         const img = document.createElement("img");
         img.src = content;
-        img.style.maxWidth = "20%"; // Prevent images from overflowing
+        img.style.maxWidth = "50%"; // Prevent images from overflowing
 
         // Focus the editor before inserting the image
         const editor = document.getElementById("editor");
