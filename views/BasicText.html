@@ -257,8 +257,10 @@
       // First refresh the token
       const token = await refreshToken();
       if (!token) {
-        alert('Please login again');
-        return;
+        if(confirm('You need to login to save. Return to login screen?'))
+        {
+          window.location.href = 'index'
+        }
       }
 
       const jsonData = getEditorContentAsJson();
@@ -486,7 +488,11 @@
         // Make authenticated request (adjust token handling as needed)
         const token = await refreshToken();
         if (!token) {
-          alert('Please login again');
+          if(confirm('Not logged in. Return to login screen?'))
+        {
+          window.location.href = 'index'
+        }
+        
           return;
         }
 

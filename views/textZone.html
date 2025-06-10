@@ -12,6 +12,10 @@
 
   <ul id="fileList"> <li>Loading...</li> </ul> <!-- The file name as link and the creator -->
 
+   <div>
+   <button onclick="window.location.href = 'home'" style="height:52px; margin-top:16px"> Return to home screen</button>
+  </div>
+
   <!-- --- Modal --- -->
   <div id="optionsModal" class="modal">
     <div class="modal-content">
@@ -26,8 +30,7 @@
     </div>
   </div>
 
-
-
+ 
   <script src="js/authHelper.js"></script> <!-- Access to refreshing token and verification -->
   <script>
     const fileList = document.getElementById('fileList');
