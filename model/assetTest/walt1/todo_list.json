@@ -1,0 +1,475 @@
+[
+  [
+    {
+      "text": "June 2, 2025: This is a list of all that is left to do. I keep forgetting what exactly this project is so here is a list of what is left.",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": true,
+        "italic": false,
+        "underline": false,
+        "fontSize": 18
+      }
+    }
+  ],
+  [
+    {
+      "text": "What shall we do Next in this project. These are in no particular order:",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": true,
+        "italic": false,
+        "underline": false,
+        "fontSize": 18
+      }
+    }
+  ],
+  [],
+  [],
+  [],
+  [
+    {
+      "text": "---Things Connor can do---",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": true,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "1. Integrate saving image into json. { \"image\": \"image.png\", \"size\": 120%}",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "      save image in the same folder as the user's file.",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "2. Make the darker grey top option section scroll with the user.",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "3. Ask user if they accept cookies, else this website does not work.",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "4. Typing shortcuts",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [],
+  [],
+  [],
+  [],
+  [
+    {
+      "text": "---Things lukas do---",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "1.",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [],
+  [
+    {
+      "text": "-------------------------------------------------------------------",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [],
+  [],
+  [
+    {
+      "text": "---Basic Text---",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": true,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "1. Update basic text elements: more colors, more sizes, fonts",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "2. Auto saving for text files (can turn on or off)",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "3. Undo controls, does not seem to be standard",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "4. Multiple pages and page scrolling",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "5. AI autocorrect implementation",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "6. Changing and setting file name (kind of weird), probably in textZone when no one is accessing it idk?",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [],
+  [],
+  [
+    {
+      "text": "---Multiple user interaction---",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": true,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "1. Allowing users and their privileges' ---This is done---",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "2. How non-created users can access securely (text Zone reads file with permissions, not the file names themselves?) ---this is done---",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "3. Having the user set privileges on the website (modal?)",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "4. actually having multiple users interact on the same page",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [],
+  [],
+  [
+    {
+      "text": "---Database---",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": true,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "1. Implement it working and hooking up to the server",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "2. Replace JSON authentication files with the database",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "3. Implement file-access later when multi-user files work",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [],
+  [],
+  [
+    {
+      "text": "---Custom note pages (maps, graphs, notecards)---",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": true,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "1. how to display and move objects like text-boxes and perhaps arrows",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "2. storing those boxes",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "3. retrieving and reshowing all that.",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "4. Showing popular ones and formats",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [],
+  [
+    {
+      "text": "---Server Improvements---",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": true,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "1. 404 not found html",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "2. Cannot traverse pages if not logged in (verify)",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "3. reloading pages if you go 'go back' and then verify they are properly logged in.",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [
+    {
+      "text": "4. Helper JS files in public? May not work due to security or chatgpt is dumb.",
+      "style": {
+        "color": "rgb(0, 0, 0)",
+        "bold": false,
+        "italic": false,
+        "underline": false,
+        "fontSize": 16
+      }
+    }
+  ],
+  [],
+  []
+]

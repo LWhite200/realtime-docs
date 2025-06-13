@@ -97,21 +97,35 @@
     <input type="text" id="customImgSize" placeholder="Custom size (e.g. 60% or 60px)" style="display: none;" oninput="applySelectedImageSize()">
   </div>
 
-
-<div >
-   <!-- Title Input -->
-  <input type="text" class="title-box" placeholder="Document Title" />
-</div>
-
   <!-- Editable content area -->
   <div class="editor" id="editor" contenteditable="true"></div>
+
+   <!-- File Name Modal -->
+  <div id="fileNameModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Set File Name</h3>
+      <input type="text" id="fileNameInput" placeholder="Enter file name..." />
+      <div style="margin-top: 10px;">
+        <button onclick="confirmFileName()">OK</button>
+        <button onclick="closeFileNameModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
   
-  
+  <!------------------------------>
+  <!-- -----| JavaScript |----- -->
+  <script src="js/bt_savingLoading.js"></script>
+  <script src="js/bt_namingHelper.js"></script>
   <script>
 
-     let selectedImage = null; // global variable at top
+    /* 
+        --- Recent Changes ---
+        - Put saving/loading int separate file
+        - impliment modal for setting and changing the file's name.
+    */
 
-    // Editor image selection
+    let selectedImage = null;
+
     document.getElementById("editor").addEventListener("click", (e) => {
       document.querySelectorAll("#editor img").forEach(img => img.style.outline = "");
       if (e.target.tagName === "IMG") {
@@ -122,11 +136,7 @@
       }
     });
 
-
-    // can change size via % or px
     function applySelectedImageSize() {
-      console.log("Selected image:", selectedImage);
-
       if (!selectedImage) {
         alert("Please click on an image to resize it.");
         return;
@@ -134,7 +144,6 @@
 
       const dropdown = document.getElementById("imgSizeDropdown");
       const input = document.getElementById("customImgSize");
-
       let size = dropdown.value;
 
       if (size === "custom") {
@@ -144,325 +153,57 @@
         input.style.display = "none";
       }
 
-       console.log("Setting width to:", size);
-
       if (size) {
-        selectedImage.style.maxWidth = "none"; // override existing limit
+        selectedImage.style.maxWidth = "none";
         selectedImage.style.width = size;
-        selectedImage.style.height = "auto"; // maintain aspect ratio
-      }
-    }
-
-    async function refreshToken() {
-      try {
-        const response = await fetch('/refresh', {
-          method: 'GET',
-          credentials: 'include' // Needed for cookies
-        });
-        if (!response.ok) throw new Error('Token refresh failed');
-        const data = await response.json();
-        return data.accessToken;
-      } catch (err) {
-        console.error('Token refresh failed:', err);
-        return null;
-      }
-    }
-    // ---------------
-    // Consolidated function to get editor content as JSON
-    function getEditorContentAsJson() {
-      const title = document.querySelector(".title-box").value || "document";
-      const editor = document.getElementById("editor");
-
-      const lines = [];
-      let currentLine = [];
-      let lastStyle = null;
-
-      function extractStyle(el) {
-        const style = window.getComputedStyle(el);
-        return {
-          color: style.color,
-          bold: style.fontWeight === "bold" || parseInt(style.fontWeight) >= 600,
-          italic: style.fontStyle === "italic",
-          underline: style.textDecoration.includes("underline"),
-          fontSize: parseInt(style.fontSize)
-        };
-      }
-
-      function stylesEqual(a, b) {
-        return JSON.stringify(a) === JSON.stringify(b);
-      }
-
-      function pushChunk(text, style) {
-        if (!text) return;
-        if (lastStyle && stylesEqual(lastStyle, style)) {
-          currentLine[currentLine.length - 1].text += text;
-        } else {
-          currentLine.push({ text, style });
-          lastStyle = style;
-        }
-      }
-
-      // Weird, needed for the spaces and indentations
-      function flushLine() {
-        if (currentLine.length > 0) {
-          lines.push(currentLine);
-        } else {
-          // Detect if the line contained only whitespace
-          const whitespaceLine = editor.innerHTML.split(/<div>|<br>/).some(div => /^\s+$/.test(div));
-          lines.push(whitespaceLine ? [{ text: " ", style: extractStyle(editor) }] : []);
-        }
-        currentLine = [];
-        lastStyle = null;
-      }
-
-
-
-
-      function walk(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const text = node.textContent;
-          if (text.trim() !== "" || text.includes(" ")) {
-            const style = extractStyle(node.parentElement || editor);
-            pushChunk(text, style);
-          }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          const tag = node.tagName;
-
-          if (tag === "BR") {
-            flushLine();
-          } else {
-            for (const child of node.childNodes) {
-              walk(child);
-            }
-            if (tag === "DIV") {
-              flushLine();
-            }
-          }
-        }
-      }
-
-      for (const node of editor.childNodes) {
-        walk(node);
-      }
-      flushLine(); // Ensure last line is added
-
-      return {
-        filename: title,
-        content: lines
-      };
-    }
-
-    //-------------------------
-    async function saveFile() {
-      // First refresh the token
-      const token = await refreshToken();
-      if (!token) {
-        if(confirm('You need to login to save. Return to login screen?'))
-        {
-          window.location.href = 'index'
-        }
-      }
-
-      const jsonData = getEditorContentAsJson();
-      
-      try {
-        const response = await fetch('/assets', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Add auth header
-          },
-          body: JSON.stringify({
-            fileName: jsonData.filename,
-            fileData: jsonData.content
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.text();
-          throw new Error(error);
-        }
-
-        const data = await response.json();
-        console.log('Save successful:', data);
-        alert(`Document saved as ${jsonData.filename}`);
-      } catch (err) {
-        console.error('Save failed:', err);
-        alert(`Save failed: ${err.message}`);
-      }
-    }
-    //----------------------------------
-
-    // File options
-    function newFile() {
-      document.getElementById("editor").innerHTML = "";
-      document.querySelector('.title-box').value = "";
-    }
-
-    // can take plain text (txt) orstyled text (JSON)
-    function openFile() {
-
-        const fileInput = document.getElementById('fileInput');
-        fileInput.click(); // triggers the hidden file dialog
-
-      fileInput.onchange = () => {
-        const file = fileInput.files[0];
-        
-        if (!file) return;
-
-        // Extract filename without extension
-        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
-        document.querySelector('.title-box').value = nameWithoutExt;
-
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-         const content = e.target.result;
-          
-         if(file.name.endsWith(".json"))
-         {
-            try {
-              
-              const parsed = JSON.parse(content);
-              loadStyledContent(parsed);
-
-            } catch(err){
-              alert("Failed to load JSON content.");
-            }
-         }
-         else
-         {
-          //plain text
-          document.getElementById("editor").innerText = content; 
-         }
-  
-        };
-
-        reader.readAsText(file);
-      
-      };
-    }
-
-    function loadStyledContent(lines) {
-      const editor = document.getElementById("editor");
-      editor.innerHTML = ""; // clear existing content
-
-      lines.forEach(line => {
-        const div = document.createElement("div");
-        if (line.length === 0) {
-          div.innerHTML = "&nbsp;"; // preserves line height for visually empty line
-        } else {
-          line.forEach(chunk => {
-            const span = document.createElement("span");
-            span.textContent = chunk.text;
-
-            const { color, bold, italic, underline, fontSize } = chunk.style;
-            span.style.color = color;
-            span.style.fontWeight = bold ? "bold" : "normal";
-            span.style.fontStyle = italic ? "italic" : "normal";
-            span.style.textDecoration = underline ? "underline" : "none";
-            span.style.fontSize = fontSize + "px";
-
-            div.appendChild(span);
-          });
-        }
-        editor.appendChild(div);
-      });
-    }
-
-
-
-
-    // Download editor content as plain text
-    function downloadFile() {
-      const text = document.getElementById("editor").innerText;
-      const blob = new Blob([text], { type: "text/plain" });
-      const link = document.createElement("a");
-      link.download = "document.txt";
-      link.href = window.URL.createObjectURL(blob);
-      link.click();
-    }
-
-    // Zoom and full screen actions
-    function zoomIn() {
-      document.getElementById("editor").style.zoom = "1.2";
-    }
-
-    function zoomOut() {
-      document.getElementById("editor").style.zoom = "1.0";
-    }
-
-    function toggleFullScreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-      } else {
-        document.exitFullscreen();
+        selectedImage.style.height = "auto";
       }
     }
 
     function addPicture() {
-    
       const fileInput = document.getElementById('picFileInput');
-      fileInput.click(); // triggers the hidden file dialog
+      fileInput.click();
 
       fileInput.onchange = () => {
         const file = fileInput.files[0];
-        
         if (!file) return;
-      
 
-      const reader = new FileReader();
-
+        const reader = new FileReader();
         reader.onload = (e) => {
-         const content = e.target.result;
-        
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          img.style.maxWidth = "50%";
 
-        //create <img> tag
-        const img = document.createElement("img");
-        img.src = content;
-        img.style.maxWidth = "50%"; // Prevent images from overflowing
+          const editor = document.getElementById("editor");
+          editor.focus();
 
-        // Focus the editor before inserting the image
-        const editor = document.getElementById("editor");
-        editor.focus();
-
-        // Insert at the cursor position in the contenteditable editor
-        insertImageAtCursor(img);
-
+          insertImageAtCursor(img);
         };
-
         reader.readAsDataURL(file);
-        
       };
 
-        function insertImageAtCursor(imgElement) 
-        {
+      function insertImageAtCursor(imgElement) {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
 
-          const selection = window.getSelection();
-          if (!selection.rangeCount) return;
-
-          const range = selection.getRangeAt(0);
-          range.deleteContents(); // Remove any selected text
-          range.insertNode(imgElement);
-        }
-
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(imgElement);
+      }
     }
 
-    // Toolbar button functionality
     document.querySelectorAll(".toolbar button").forEach(button => {
       button.addEventListener("click", () => {
         const command = button.dataset.command;
         const value = button.dataset.value || null;
         document.execCommand(command, false, value);
 
-        // Highlight active formatting buttons
         if (["bold", "italic", "underline"].includes(command)) {
           button.classList.toggle("active");
         }
       });
     });
 
-    // Keep toolbar buttons in sync with selection
     document.getElementById("editor").addEventListener("keyup", updateToolbarState);
     document.getElementById("editor").addEventListener("mouseup", updateToolbarState);
 
@@ -474,61 +215,7 @@
       });
     }
 
-
-
-    // Helper: Get query parameter by name
-    function getQueryParam(name) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
-    }
-
-    // Load file content from server by filename
-    async function loadFileFromServer(fileName) {
-      try {
-        // Make authenticated request (adjust token handling as needed)
-        const token = await refreshToken();
-        if (!token) {
-          if(confirm('Not logged in. Return to login screen?'))
-        {
-          window.location.href = 'index'
-        }
-        
-          return;
-        }
-
-        const response = await fetch(`/assets/${fileName}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch file: ${response.statusText}`);
-        }
-
-        const { fileName: returnedFileName, content } = await response.json();
-
-
-        const fileParts = returnedFileName.split('/');
-        // Set title input
-        document.querySelector('.title-box').value = fileParts[1];
-
-        // Load content into editor
-        loadStyledContent(content);
-      } catch (err) {
-        console.error('Error loading file:', err);
-        alert(`Error loading file: ${err.message}`);
-      }
-    }
-
-    // On page load, check if there's a ?file= query and load that file
-    window.addEventListener('DOMContentLoaded', () => {
-      const fileName = getQueryParam('file');
-      if (fileName) {
-        loadFileFromServer(fileName);
-      }
-    });
-
+    // modal script in bt_namingHelper
   </script>
 </body>
 </html>
