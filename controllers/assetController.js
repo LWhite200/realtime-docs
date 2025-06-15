@@ -328,10 +328,55 @@ const getAllFiles = (req, res) => {
     res.json(files);
 };
 
+
+// I finally get it to work but then forget to update the assetMap!!!
+const renameFile = (req, res) => {
+    const creator = req.user;
+    const { oldName, newName } = req.body;
+
+    if (!creator || !oldName || !newName) {
+        return res.status(400).json({ message: 'Both old and new file names are required.' });
+    }
+
+    const oldPath = path.join(assetsLocation, creator, oldName + '.json');
+    const newPath = path.join(assetsLocation, creator, newName + '.json');
+
+    if (!fs.existsSync(oldPath)) {
+        return res.status(404).json({ message: 'Original file does not exist.' });
+    }
+
+    fs.rename(oldPath, newPath, (err) => {
+        if (err) {
+            console.error('Rename error:', err);
+            return res.status(500).json({ message: 'Failed to rename file.' });
+        }
+
+        // Update asset map
+        const assetMap = getAssetMap();
+
+        for (const user in assetMap) {
+            if (assetMap[user][oldName] && assetMap[user][oldName].creator === creator) {
+                assetMap[user][newName] = {
+                    ...assetMap[user][oldName],
+                    lastModified: new Date().toISOString()
+                };
+                delete assetMap[user][oldName];
+            }
+        }
+
+        updateAssetMap(assetMap);
+
+        return res.status(200).json({ message: 'File renamed successfully.' });
+    });
+};
+
+
+
 module.exports = {
     getAllFiles,
     getFile,
     saveOrUpdateFile,
     downloadFile, 
-    deleteFile
+    deleteFile,
+    renameFile
 };

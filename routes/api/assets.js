@@ -1,5 +1,5 @@
 /*
-    This is f
+    This is asset.js
 */
 
 const express = require('express');
@@ -17,5 +17,9 @@ router.route('/:creator/:fileName')
 
 // Add this new route for downloading files
 router.get('/download/:creator/:fileName', assetController.downloadFile);
+
+// Rename a file
+router.put('/rename', assetController.renameFile);
+
 
 module.exports = router;

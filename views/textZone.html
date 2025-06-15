@@ -176,9 +176,41 @@
       }
     }
 
-    function handleRename() {
-      alert('Rename feature coming soon...');
+
+    async function renameFile(oldName, newName) {
+      try {
+        temp = `${"my test: " + oldName + " " + newName}`;
+        alert(temp);
+
+        const response = await fetchWithAuth(`${API_BASE_URL}/assets/rename`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ oldName, newName })
+        });
+
+        if (!response.ok) {
+          const errorMsg = await response.text();
+          throw new Error(`Rename failed: ${response.statusText} - ${errorMsg}`);
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Rename error:', error);
+        alert(`Rename Failed: ${error.message}`);
+      }
     }
+
+
+    // Why does nothing ever work???
+    async function handleRename() {
+      const newName = prompt("Enter new file name:");
+      if (newName) {
+        await renameFile(currentFileName, newName);
+        closeModal();
+        fetchFiles();
+      }
+    }
+
 
     function handlePermissions() {
       alert('Permissions feature coming soon...');
