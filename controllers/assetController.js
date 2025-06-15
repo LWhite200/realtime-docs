@@ -7,6 +7,7 @@ const path = require('path');
 // Path to assets information
 const assetsLocation = path.join(__dirname, '../model/assetTest');
 const EachUserAssetMap = path.join(__dirname, '../model/assetTest.json');
+const usersFilePath = path.join(__dirname, '../model/users.json');
 
 // Initialize directories and files if they don't exist
 if (!fs.existsSync(assetsLocation)) {
@@ -15,6 +16,17 @@ if (!fs.existsSync(assetsLocation)) {
 if (!fs.existsSync(EachUserAssetMap)) {
     fs.writeFileSync(EachUserAssetMap, JSON.stringify({}, null, 2));
 }
+
+const userExists = (username) => {
+    if (!fs.existsSync(usersFilePath)) return false;
+    try {
+        const users = JSON.parse(fs.readFileSync(usersFilePath, 'utf-8'));
+        return Array.isArray(users) && users.some(user => user.username === username);
+    } catch (err) {
+        console.error('Error reading users.json:', err);
+        return false;
+    }
+};
 
 // Helper functions
 const getAssetMap = () => {
@@ -347,7 +359,6 @@ const renameFile = (req, res) => {
 
     fs.rename(oldPath, newPath, (err) => {
         if (err) {
-            console.error('Rename error:', err);
             return res.status(500).json({ message: 'Failed to rename file.' });
         }
 
@@ -363,12 +374,63 @@ const renameFile = (req, res) => {
                 delete assetMap[user][oldName];
             }
         }
-
         updateAssetMap(assetMap);
-
         return res.status(200).json({ message: 'File renamed successfully.' });
     });
 };
+
+const grantAccess = (req, res) => {
+    const accessGiver = req.user;
+    const { currentFileName, grantName } = req.body;
+
+    if (!accessGiver || !currentFileName || !grantName) {
+        return res.status(400).json({ message: 'Missing required parameters.' });
+    }
+
+    const assetMap = getAssetMap();
+
+    // Check if the accessGiver actually has the file
+    const fileMeta = assetMap[accessGiver]?.[currentFileName];
+    if (!fileMeta) {
+        return res.status(404).json({ message: 'File not found under your access.' });
+    }
+
+    // Confirm they are the creator of this file
+    if (fileMeta.creator !== accessGiver) {
+        return res.status(403).json({
+            message: 'Only the creator can grant access.',
+            creator: fileMeta.creator,
+            currentUser: accessGiver
+        });
+    }
+
+    // Check if grantName is a valid user from users.json
+    const grantUserExists = userExists(grantName);
+    if (!grantUserExists) {
+        return res.status(404).json({ 
+            message: `User "${grantName}" does not exist.` 
+        });
+    }
+
+
+    // Grant access
+    if (!assetMap[grantName]) {
+        assetMap[grantName] = {};
+    }
+
+    assetMap[grantName][currentFileName] = {
+        ...fileMeta,
+        lastModified: new Date().toISOString()
+    };
+
+    updateAssetMap(assetMap);
+
+    return res.status(200).json({
+        message: `Access to "${currentFileName}" granted to ${grantName}.`
+    });
+};
+
+
 
 
 
@@ -378,5 +440,6 @@ module.exports = {
     saveOrUpdateFile,
     downloadFile, 
     deleteFile,
-    renameFile
+    renameFile,
+    grantAccess
 };

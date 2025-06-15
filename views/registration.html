@@ -38,6 +38,15 @@
             
             const messageDiv = document.getElementById('message');
             messageDiv.style.display = 'none';
+
+            // Validate alphanumeric username
+            const alphanumericRegex = /^[a-zA-Z0-9]+$/;
+            if (!alphanumericRegex.test(user)) {
+                messageDiv.textContent = 'Username must contain only alphanumeric characters.';
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+                return;
+            }
             
             try {
                 const response = await fetch('/register', {
@@ -55,7 +64,6 @@
                     messageDiv.className = 'message success';
                     messageDiv.style.display = 'block';
                     
-                    // Redirect to index.html after 2 seconds, or message, this easier
                     setTimeout(() => {
                         window.location.href = '/';
                     }, 2000);
@@ -70,6 +78,7 @@
                 messageDiv.style.display = 'block';
             }
         }
+
     </script>
 </body>
 </html>

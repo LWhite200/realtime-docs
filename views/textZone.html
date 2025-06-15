@@ -35,6 +35,16 @@
   <script>
     const fileList = document.getElementById('fileList');
 
+    let currentUser = null;
+
+    (async () => {
+      try {
+        currentUser = await getCurrentUsername();
+      } catch (e) {
+        console.error("User not logged in or session expired.");
+      }
+    })();
+
     /*
       --- Now this file uses the authHelper.js to be more readable and consistent
       ------ fetchWithAuth handles the authToken and updates that when needed
@@ -81,7 +91,7 @@
           // Button for options
           const optionsBtn = document.createElement('button');
           optionsBtn.textContent = 'Options';
-          optionsBtn.onclick = () => openModal(fileParts[1]);
+          optionsBtn.onclick = () => openModal(fileName);
           li.appendChild(optionsBtn);
 
           fileList.appendChild(li);
@@ -153,16 +163,45 @@
     // Modal functionality
     let currentFileName = '';
 
-    function openModal(fileName) {
-      currentFileName = fileName;
-      document.getElementById('modalFileName').textContent = "File Name: " + fileName;
-      document.getElementById('optionsModal').style.display = 'flex';
+
+    function openModal(fullFileName) {
+      
+      const [creator, actualFileName] = fullFileName.split('/');
+      currentFileName = actualFileName;
+
+      document.getElementById('modalFileName').textContent = "File Name: " + actualFileName;
+
+      const modal = document.getElementById('optionsModal');
+
+      const isCreator = creator === currentUser;
+
+      // Always show download and cancel
+      modal.querySelector('button[onclick="handleDownload()"]').style.display = 'inline-block';
+      modal.querySelector('button[onclick="closeModal()"]').style.display = 'inline-block';
+
+      // Only show these if user is the creator
+      modal.querySelector('button[onclick="handleRename()"]').style.display = isCreator ? 'inline-block' : 'none';
+      modal.querySelector('button[onclick="handleDelete()"]').style.display = isCreator ? 'inline-block' : 'none';
+      modal.querySelector('button[onclick="handlePermissions()"]').style.display = isCreator ? 'inline-block' : 'none';
+      modal.querySelector('button[onclick="handleMakePublic()"]').style.display = isCreator ? 'inline-block' : 'none';
+
+      modal.style.display = 'flex';
     }
 
+
+
+
     function closeModal() {
+      const modal = document.getElementById('optionsModal');
       currentFileName = '';
-      document.getElementById('optionsModal').style.display = 'none';
+
+      modal.querySelectorAll('button').forEach(btn => {
+        btn.style.display = 'none';
+      });
+
+      modal.style.display = 'none';
     }
+
 
     async function handleDownload() {
       await downloadFile(currentFileName);
@@ -179,9 +218,6 @@
 
     async function renameFile(oldName, newName) {
       try {
-        temp = `${"my test: " + oldName + " " + newName}`;
-        alert(temp);
-
         const response = await fetchWithAuth(`${API_BASE_URL}/assets/rename`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -192,14 +228,15 @@
           const errorMsg = await response.text();
           throw new Error(`Rename failed: ${response.statusText} - ${errorMsg}`);
         }
-
+        else {
+          alert(`${response.statusText}`)
+        }
         return true;
       } catch (error) {
         console.error('Rename error:', error);
         alert(`Rename Failed: ${error.message}`);
       }
     }
-
 
     // Why does nothing ever work???
     async function handleRename() {
@@ -211,9 +248,38 @@
       }
     }
 
+    //-----------------------------------------------
 
-    function handlePermissions() {
-      alert('Permissions feature coming soon...');
+    // Perhaps another day.
+    async function grantAccess(grantName) {
+      try {
+        const response = await fetchWithAuth(`${API_BASE_URL}/assets/grantAccess`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentFileName, grantName })
+        });
+
+        if (!response.ok) {
+          const errorMsg = await response.text();
+          throw new Error(`Access Granting failed: ${response.statusText} - ${errorMsg}`);
+        }
+        else {
+          alert(`${response.statusText}`)
+        }
+        return true;
+      } catch (error) {
+        console.error('Access Granting error:', error);
+        alert(`Access Granting Failed: ${error.message}`);
+      }
+    }
+
+    async function handlePermissions() {
+      const grantName = prompt("Enter their UserName:");
+      if (grantName) {
+        await grantAccess(grantName);
+        closeModal();
+        fetchFiles();
+      }
     }
 
     function handleMakePublic() {

@@ -97,8 +97,42 @@ async function fetchWithAuth(url, options = {}) {
   return response;
 }
 
+
+
+
+let cachedUsername = null;
+
+async function getCurrentUsername() {
+  if (cachedUsername) return cachedUsername;
+
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/getInfo`, {
+      method: 'GET'
+    });
+
+    const text = await response.text();
+
+    if (!text) throw new Error("Empty user info response");
+
+    const parts = text.trim().split(/\s+/);
+    cachedUsername = parts[0].replace(/:$/, ''); // "Alice:" => "Alice"
+
+    return cachedUsername;
+  } catch (err) {
+    console.error("Failed to get username:", err);
+    redirectToLogin();
+    throw err;
+  }
+}
+
+
+
+
+
+
 // Expose globally
 // Make helpers globally available
 window.fetchWithAuth = fetchWithAuth;
 window.refreshToken = refreshToken;
 window.checkToken = checkToken;
+window.getCurrentUsername = getCurrentUsername;

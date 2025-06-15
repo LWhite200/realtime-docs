@@ -21,5 +21,8 @@ router.get('/download/:creator/:fileName', assetController.downloadFile);
 // Rename a file
 router.put('/rename', assetController.renameFile);
 
+// Rename a file
+router.put('/grantAccess', assetController.grantAccess);
+
 
 module.exports = router;
