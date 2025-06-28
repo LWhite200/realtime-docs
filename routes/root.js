@@ -36,4 +36,12 @@ router.get('/BasicText', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'BasicText.html'));
 });
 
+router.get('/customFormats', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'views', 'WB.html'));
+});
+
+
+
+
+
 module.exports = router;

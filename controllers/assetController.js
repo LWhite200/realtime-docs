@@ -63,13 +63,14 @@ const saveOrUpdateFile = (req, res) => {
         return res.status(400).json({ error: 'Missing user context' });
     }
 
-    const { fileName, fileData } = req.body;
+    const { fileName, creatorName, dateCreated, lastEdited, lastEditor, fileData } = req.body;
     if (!fileName || !fileData) {
         return res.status(400).json({
             error: 'fileName and fileData are required',
             received: req.body
         });
     }
+
 
     try {
         // Check if fileName is in creator/fileName format
@@ -91,7 +92,28 @@ const saveOrUpdateFile = (req, res) => {
         const filePath = path.join(userDir, `${actualFileName}.json`);
         
         // Save/update the file content
-        fs.writeFileSync(filePath, JSON.stringify(fileData, null, 2));
+        // Also add more attributes here when the time comes
+        // Yes here please do not forget
+        fs.writeFileSync(filePath, JSON.stringify({
+            creatorName,
+            dateCreated,
+            lastEdited,
+            lastEditor,
+            fileContent: fileData
+        }, null, 2));
+
+
+        /*
+        body: JSON.stringify({
+            fileName: currentFileName, // object 1
+            creatorName: editor, // Fix so actual creator uif the file is new
+            dateCreated: new Date().toISOString(),  // !!! !!! !!! please fix so only when file is new
+            lastEdited: new Date().toISOString(),
+            lastEditor: editor,
+            fileData: jsonData.content // object
+        })
+        */
+
 
         // Update the asset map
         const assetMap = getAssetMap();

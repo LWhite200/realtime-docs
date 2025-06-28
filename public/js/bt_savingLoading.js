@@ -1,3 +1,4 @@
+// Handling each request with checking the validity of the tokens and refreshing them as needed
 async function refreshToken() {
   try {
     const response = await fetch('/refresh', {
@@ -13,14 +14,16 @@ async function refreshToken() {
   }
 }
 
+// Converts the html conntetn into a json object
 function getEditorContentAsJson() {
-  const title = currentFileName || "document"; // ------------------------------------
-  const editor = document.getElementById("editor");
+  const title = currentFileName || "document"; 
+  const editor = document.getElementById("editor");   // -------------This Not Work-----------------------
 
-  const lines = [];
+  const lines = [];     // Holds all the lines of content
   let currentLine = [];
-  let lastStyle = null;
+  let lastStyle = null; // Tracks style of the previous chunk
 
+  // Extracts style properties from the dom element
   function extractStyle(el) {
     const style = window.getComputedStyle(el);
     return {
@@ -32,6 +35,7 @@ function getEditorContentAsJson() {
     };
   }
 
+  // Compares two style objects to check if they are the same
   function stylesEqual(a, b) {
     if (!a || !b) return false;
     return a.color === b.color &&
@@ -41,6 +45,7 @@ function getEditorContentAsJson() {
            a.fontSize === b.fontSize;
   }
 
+  // Adds a text chunk to the current line, merging with previous chunk if same style
   function pushChunk(text, style) {
     if (!text) return;
     // Merge text with same style if possible
@@ -123,9 +128,15 @@ async function saveFile() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
+
+      // The attributes of the json file we want to create
       body: JSON.stringify({
-        fileName: currentFileName,
-        fileData: jsonData.content
+        fileName: currentFileName, // object 1
+        creatorName: editor, // Fix so actual creator uif the file is new
+        dateCreated: new Date().toISOString(),  // !!! !!! !!! please fix so only when file is new
+        lastEdited: new Date().toISOString(),
+        lastEditor: editor,
+        fileData: jsonData.content // object
       })
     });
 
@@ -162,7 +173,9 @@ function openFile() {
       if (file.name.endsWith(".json")) {
         try {
           const parsed = JSON.parse(content);
-          loadStyledContent(parsed.content || parsed); // support both formats
+
+          // This allows for old and new file-saves to work. The first check is if the dom is stored under 'fileContent' in json.
+          loadStyledContent(parsed.fileContent || parsed.content || parsed); // support both formats
         } catch {
           alert("Failed to load JSON content.");
         }
@@ -229,7 +242,7 @@ async function loadFileFromServer(fileName) {
 
     const { fileName: returnedFileName, content } = await response.json();
 
-    loadStyledContent(content);
+    loadStyledContent(content.fileContent || content);
   } catch (err) {
     alert(`Error loading file: ${err.message}`);
   }

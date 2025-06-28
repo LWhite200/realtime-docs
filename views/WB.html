@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Deity Battle</title>
+  <style>
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .battlefield {
+      display: flex;
+      justify-content: space-between;
+      gap: 40px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: #1e1e1e;
+      border: 2px solid #333;
+      border-radius: 10px;
+      padding: 20px;
+      width: 100%;
+      max-width: 300px;
+      box-shadow: 0 0 10px #111;
+    }
+
+    .status {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .hp-bar-container {
+      background: #333;
+      border-radius: 5px;
+      height: 18px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .hp-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #0f0, #0c0);
+      width: 100%;
+      transition: width 0.3s ease-in-out;
+    }
+
+    .letters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    .letters button {
+      padding: 10px 15px;
+      font-size: 16px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .letters button:hover {
+      background: #555;
+    }
+
+    .controls {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+    }
+
+    button.control-btn {
+      background: #444;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button.control-btn:hover {
+      background: crimson;
+    }
+
+    .effects {
+      font-size: 14px;
+      margin-top: 10px;
+      color: #ccc;
+    }
+
+    .switch-panel {
+      margin-top: 10px;
+    }
+
+    .switch-panel button {
+      margin-right: 5px;
+      margin-top: 5px;
+    }
+
+    .log {
+      margin-top: 20px;
+      background: #222;
+      padding: 10px;
+      border-radius: 5px;
+      min-height: 100px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      line-height: 1.4;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      color: #fff;
+    }
+
+    .modal-content pre {
+      white-space: pre-wrap;
+    }
+
+    .close-modal {
+      float: right;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Deity Battle</h1>
+<button class="control-btn" onclick="showHelp()">Show Move Descriptions</button>
+<button class="control-btn" onclick="showTypeChart()">Show Type Chart</button>
+
+<div class="battlefield">
+  <div class="card" id="userCard">
+    <div class="status">Your HP: <span id="userHP">150</span></div>
+    <div class="hp-bar-container"><div class="hp-bar" id="userHPBar"></div></div>
+    <h2 id="userDeityName">Deity 1</h2>
+    <p>Stamina: <span id="userStamina">10</span></p>
+    <div class="letters" id="userLetters"></div>
+    <div class="effects" id="userEffects">No effects</div>
+    <div class="switch-panel" id="userSwitchPanel"></div>
+    <div class="controls">
+      <button class="control-btn" onclick="forfeit()">Forfeit Match</button>
+    </div>
+  </div>
+
+  <div class="card" id="enemyCard">
+    <div class="status">Enemy HP: <span id="enemyHP">150</span></div>
+    <div class="hp-bar-container"><div class="hp-bar" id="enemyHPBar"></div></div>
+    <h2 id="enemyDeityName">Enemy 1</h2>
+    <p>Stamina: <span id="enemyStamina">10</span></p>
+    <div class="letters" id="enemyLetters"></div>
+    <div class="effects" id="enemyEffects">No effects</div>
+  </div>
+</div>
+
+<div style="text-align:center; margin-top:20px;">
+  <button id="newGameBtn" class="control-btn" style="display:none;" onclick="location.reload()">Start New Game</button>
+</div>
+
+
+
+<div class="log" id="gameLog"></div>
+
+<!-- Modal -->
+<div class="modal" id="moveModal">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeHelp()">&times;</span>
+    <h2>Move Descriptions</h2>
+    <pre>
+A: 10 damage, 1 stamina
+B: 25 damage, 2 stamina
+C: 50 damage, 5 stamina
+D: Opponent's next attack does 3/4 damage, 1 stamina
+E: User's next attack does 5/4 damage, 1 stamina
+F: Opponent's accuracy -1 stage, 1 stamina
+G: Protect from next attack, 1 stamina
+H: User must switch within 3 turns or die, 2 stamina
+I: Increase user's accuracy +1 stage, 1 stamina
+J: Next 2+ stamina move does 1/2 damage, 1 stamina
+K: Scaling damage (2→4→8…), each hit 50% chance, ends on miss, 3 stamina
+L: Enemy can't switch if they have 2 or less stamina, 1 stamina
+M: Heal 25 HP, 4 stamina
+N: Heal 50 HP, 8 stamina
+O: Repeat last move, only 2 stamina
+P: Opponent cannot use attacking move (A, B, C, K) next turn, 2 stamina
+    </pre>
+  </div>
+</div>
+
+<!-- Type Chart Modal -->
+<div class="modal" id="typeChartModal">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeTypeChart()">&times;</span>
+    <h2>Type Effectiveness Chart</h2>
+    <pre>
+BLACK   → WHITE, CYAN
+WHITE   → BLACK, MAGENTA
+MAGENTA → YELLOW
+CYAN    → YELLOW
+YELLOW  → WATER
+WATER   → FIRE
+FIRE    → ICE, CYAN
+ICE     → MAGENTA
+    </pre>
+  </div>
+</div>
+
+
+
+
+
+
+<script>
+let turnNumber = 1;
+const LETTER_POOL = 'ABCDEFGHIJKL'.split('');
+const MAX_HP = 150;
+const MAX_STAMINA = 10;
+const logEl = document.getElementById('gameLog');
+
+function getRandomLetters(count) {
+    const pool = [...LETTER_POOL];
+    const result = [];
+    while (result.length < count && pool.length > 0) {
+        const idx = Math.floor(Math.random() * pool.length);
+        result.push(pool.splice(idx, 1)[0]);
+    }
+    return result;
+}
+
+const TYPES = ['BLACK', 'WHITE', 'MAGENTA', 'CYAN', 'YELLOW', 'WATER', 'FIRE', 'ICE'];
+
+// Define type effectiveness chart
+const TYPE_EFFECTIVENESS = {
+  BLACK: ['WHITE', 'CYAN'],
+  WHITE: ['BLACK', 'MAGENTA'],
+  MAGENTA: ['YELLOW'],
+  CYAN: ['YELLOW'],
+  YELLOW: ['WATER'],
+  WATER: ['FIRE'],
+  FIRE: ['ICE', 'CYAN'],
+  ICE: ['MAGENTA'],
+};
+
+// Assign each deity a single random type on creation
+function createDeity(name) {
+    const type = TYPES[Math.floor(Math.random() * TYPES.length)];
+    return {
+        name,
+        type,
+        stamina: MAX_STAMINA,
+        letters: getRandomLetters(5),
+        accuracyStage: 0,
+        nextMultiplier: 1,
+        protected: false,
+        forcedSwitch: 0,
+        scalingK: 2,
+        cantSwitch: false,
+        doomTimer: 0,
+        tempEffects: {}
+    };
+}
+
+const user = {
+    hp: MAX_HP,
+    deities: Array.from({ length: 5 }, (_, i) => createDeity(`Deity ${i + 1}`)),
+    activeIndex: 0
+};
+
+const enemy = {
+    hp: MAX_HP,
+    deities: Array.from({ length: 5 }, (_, i) => createDeity(`Enemy ${i + 1}`)),
+    activeIndex: 0
+};
+
+function updateHPBars() {
+  const userPercent = (user.hp / MAX_HP) * 100;
+  const enemyPercent = (enemy.hp / MAX_HP) * 100;
+  document.getElementById('userHPBar').style.width = `${userPercent}%`;
+  document.getElementById('enemyHPBar').style.width = `${enemyPercent}%`;
+}
+
+function renderDeity(team, role) {
+  const deity = team.deities[team.activeIndex];
+  document.getElementById(`${role}DeityName`).textContent = `${deity.name} [${deity.type}]`;
+  document.getElementById(`${role}Stamina`).textContent = deity.stamina;
+  document.getElementById(`${role}HP`).textContent = team.hp;
+
+  const container = document.getElementById(`${role}Letters`);
+  container.innerHTML = '';
+  deity.letters.forEach(letter => {
+    const btn = document.createElement('button');
+    btn.textContent = letter;
+    if (role === 'user') btn.onclick = () => userTurn(letter);
+    else btn.disabled = true;
+    container.appendChild(btn);
+  });
+
+  const effects = [];
+  if (deity.protected) effects.push("Protected");
+  if (deity.nextMultiplier !== 1) effects.push(`Next Damage x${deity.nextMultiplier}`);
+  if (deity.accuracyStage !== 0) effects.push(`Accuracy Stage ${deity.accuracyStage}`);
+  if (deity.forcedSwitch > 0) effects.push(`Must switch in ${deity.forcedSwitch}`);
+  if (deity.cantSwitch) effects.push("Switch lock if stamina ≤ 2");
+  if (deity.doomTimer > 0) effects.push(`Doom (${deity.doomTimer})`);
+
+  document.getElementById(`${role}Effects`).textContent = effects.length ? effects.join(', ') : 'No effects';
+
+  if (role === 'user') {
+    const switchPanel = document.getElementById('userSwitchPanel');
+    switchPanel.innerHTML = '';
+    team.deities.forEach((d, i) => {
+      const btn = document.createElement('button');
+      btn.textContent = d.name;
+      btn.disabled = i === team.activeIndex;
+      btn.onclick = () => switchUserDeity(i);
+      switchPanel.appendChild(btn);
+    });
+  }
+
+  updateHPBars();
+}
+
+function getTypeEffectiveness(attackerType, defenderType) {
+  if (TYPE_EFFECTIVENESS[attackerType]?.includes(defenderType)) {
+    return 'super';
+  }
+  if (TYPE_EFFECTIVENESS[defenderType]?.includes(attackerType)) {
+    return 'resisted';
+  }
+  return 'normal';
+}
+
+
+function forfeit() {
+    alert("You forfeited the match.");
+    location.reload();
+}
+
+function switchUserDeity(index) {
+    logEl.innerText = `Turn ${turnNumber++}:\n`;
+
+    const current = user.deities[user.activeIndex];
+    current.stamina = Math.min(MAX_STAMINA, current.stamina + 1);
+
+    current.doomTimer = 0;
+
+    user.activeIndex = index;
+
+    endTurnCleanup(user);
+    enemyAutoMove();
+    endTurnCleanup(enemy);
+
+    renderDeity(user, 'user');
+    renderDeity(enemy, 'enemy');
+    checkGameOver();
+}
+
+function calculateAccuracy(stage, stamina) {
+    let base = 1 + stage * 0.25;
+    if (stamina < MAX_STAMINA * 0.25) base *= 0.75;
+    else if (stamina < MAX_STAMINA * 0.5) base *= 0.75;
+    return Math.max(0.1, base);
+}
+
+function userTurn(letter) {
+    logEl.innerText = `Turn ${turnNumber++}:\n`;
+
+    const userDeity = user.deities[user.activeIndex];
+    const enemyDeity = enemy.deities[enemy.activeIndex];
+
+    const userFirst = letter === 'G' ? true : (userDeity.stamina > enemyDeity.stamina || (userDeity.stamina === enemyDeity.stamina && Math.random() < 0.5));
+
+    if (userFirst) {
+        handleMove(letter, user, enemy);
+        if (enemy.hp > 0) enemyAutoMove();
+    } else {
+        enemyAutoMove();
+        if (user.hp > 0) handleMove(letter, user, enemy);
+    }
+
+    endTurnCleanup(user);
+    endTurnCleanup(enemy);
+
+    renderDeity(user, 'user');
+    renderDeity(enemy, 'enemy');
+    checkGameOver();
+}
+
+function handleMove(letter, actingSide, opposingSide) {
+    const actor = actingSide.deities[actingSide.activeIndex];
+    const target = opposingSide;
+    const enemyDeity = target.deities[target.activeIndex];
+
+    let staminaCost = 0, damage = 0;
+    let moveLog = `${actor.name} used ${letter}: `;
+    const acc = calculateAccuracy(actor.accuracyStage, actor.stamina);
+    const dmgMultiplier = actor.nextMultiplier;
+
+    switch (letter) {
+        case 'A': staminaCost = 1; damage = 10; break;
+        case 'B': staminaCost = 2; damage = 25; break;
+        case 'C': staminaCost = 5; damage = 50; break;
+        case 'D': staminaCost = 1; enemyDeity.tempEffects.nextMultiplier = enemyDeity.nextMultiplier = 0.75; moveLog += "Weakened enemy's next attack."; break;
+        case 'E': staminaCost = 1; actor.tempEffects.nextMultiplier = actor.nextMultiplier = 1.25; moveLog += "Boosted user's next attack."; break;
+        case 'F': staminaCost = 1; enemyDeity.tempEffects.accuracyStage = enemyDeity.accuracyStage -= 1; moveLog += "Lowered enemy's accuracy."; break;
+        case 'G': staminaCost = 1; actor.tempEffects.protected = actor.protected = true; moveLog += "Gained protection."; break;
+        case 'H':
+            staminaCost = 2;
+            if (actor.doomTimer === 0 && enemyDeity.doomTimer === 0) {
+                actor.doomTimer = 4;
+                enemyDeity.doomTimer = 4;
+                moveLog += "Both deities are doomed in 4 turns!";
+            } else {
+                moveLog += "Already doomed, no effect.";
+            }
+            break;
+        case 'I': staminaCost = 1; actor.tempEffects.accuracyStage = actor.accuracyStage += 1; moveLog += "Increased user's accuracy."; break;
+        case 'J': staminaCost = 1; actor.tempEffects.nextMultiplier = actor.nextMultiplier = 0.5; moveLog += "Weakened next strong move."; break;
+        case 'K':
+            staminaCost = 3;
+            let total = 4, factor = 2;
+            while (Math.random() < 0.5) total += (factor *= 2);
+            damage = total;
+            break;
+        case 'L': staminaCost = 1; enemyDeity.tempEffects.cantSwitch = enemyDeity.cantSwitch = true; moveLog += "Enemy switch restricted."; break;
+        default: moveLog += "Invalid move."; logEl.innerText += moveLog + '\n'; return;
+    }
+
+    if (actor.stamina < staminaCost) {
+        moveLog += " Not enough stamina!";
+    } else {
+        actor.stamina -= staminaCost;
+        if (damage > 0) {
+            if (Math.random() <= acc) {
+                if (actor.stamina < MAX_STAMINA * 0.25) damage = Math.floor(damage / 2);
+                
+                // Check type effectiveness
+                const effectiveness = getTypeEffectiveness(actor.type, enemyDeity.type);
+                let effectivenessMsg = '';
+                if (effectiveness === 'super') {
+                    effectivenessMsg = ' It is super effective!';
+                } else if (effectiveness === 'resisted') {
+                    effectivenessMsg = ' It is resisted.';
+                }
+                
+                let finalDmg = Math.floor(damage * dmgMultiplier);
+                if (enemyDeity.protected) {
+                    moveLog += " Attack blocked!";
+                    enemyDeity.protected = false;
+                } else {
+                    target.hp = Math.max(0, target.hp - finalDmg);
+                    moveLog += ` Hit for ${finalDmg} damage.${effectivenessMsg}`;
+                }
+            } else {
+                moveLog += " Missed!";
+            }
+        }
+
+    }
+
+    logEl.innerText += moveLog + '\n';
+}
+
+function endTurnCleanup(side) {
+    const deity = side.deities[side.activeIndex];
+    deity.nextMultiplier = 1;
+    deity.protected = false;
+    deity.accuracyStage = 0;
+    deity.cantSwitch = false;
+
+    deity.tempEffects = {};
+
+    if (deity.forcedSwitch > 0) deity.forcedSwitch--;
+
+    if (deity.doomTimer > 0) {
+        deity.doomTimer--;
+        if (deity.doomTimer === 0) {
+            side.hp = 0;
+            logEl.innerText += `${deity.name} failed to escape doom and was destroyed!\n`;
+        }
+    }
+}
+
+function enemyAutoMove() {
+    const deity = enemy.deities[enemy.activeIndex];
+    const move = deity.letters.find(l => deity.stamina >= ((l === 'A') ? 1 : (l === 'B') ? 2 : (l === 'C') ? 5 : 1));
+    if (!move) return;
+    handleMove(move, enemy, user);
+}
+
+function checkGameOver() {
+    const newGameBtn = document.getElementById('newGameBtn');
+    let message = null;
+
+    if (user.hp <= 0 && enemy.hp <= 0) {
+        message = "It's a tie!";
+    } else if (user.hp <= 0) {
+        message = "You lost!";
+    } else if (enemy.hp <= 0) {
+        message = "You win!";
+    }
+
+    if (message) {
+        logEl.innerText += `\n${message}\n`;
+        newGameBtn.style.display = 'inline-block';
+
+        // Disable user interaction
+        const buttons = document.querySelectorAll('#userLetters button');
+        buttons.forEach(btn => btn.disabled = true);
+    }
+}
+
+
+renderDeity(user, 'user');
+renderDeity(enemy, 'enemy');
+
+function showHelp() {
+    document.getElementById('moveModal').style.display = 'flex';
+}
+function closeHelp() {
+    document.getElementById('moveModal').style.display = 'none';
+}
+
+
+function showTypeChart() {
+  document.getElementById('typeChartModal').style.display = 'flex';
+}
+function closeTypeChart() {
+  document.getElementById('typeChartModal').style.display = 'none';
+}
+
+</script>
+
+</body>
+</html>

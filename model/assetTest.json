@@ -3,7 +3,7 @@
     "todo_list": {
       "creator": "luke",
       "dateCreated": "2025-06-04T17:10:12.294Z",
-      "lastModified": "2025-06-04T17:10:12.294Z"
+      "lastModified": "2025-06-15T15:03:00.092Z"
     },
     "yellow": {
       "creator": "luke",
@@ -46,6 +46,16 @@
       "creator": "walt1",
       "dateCreated": "2025-06-15T14:54:18.960Z",
       "lastModified": "2025-06-15T14:58:11.150Z"
+    },
+    "OperationSolarFlare": {
+      "creator": "walt1",
+      "dateCreated": "2025-06-27T20:06:09.771Z",
+      "lastModified": "2025-06-27T20:20:06.287Z"
+    },
+    "ASHBT": {
+      "creator": "walt1",
+      "dateCreated": "2025-06-28T02:34:20.695Z",
+      "lastModified": "2025-06-28T03:01:45.857Z"
     }
   },
   "Walter": {

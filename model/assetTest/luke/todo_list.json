@@ -24,7 +24,6 @@
     }
   ],
   [],
-  [],
   [
     {
       "text": "---Basic Text---",
@@ -97,19 +96,6 @@
       }
     }
   ],
-  [
-    {
-      "text": "6. Changing and setting file name (kind of weird), probably in textZone when no one is accessing it idk?",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
-      }
-    }
-  ],
-  [],
   [],
   [
     {
@@ -125,31 +111,7 @@
   ],
   [
     {
-      "text": "1. Allowing users and their privileges' ---This is done---",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
-      }
-    }
-  ],
-  [
-    {
-      "text": "2. How non-created users can access securely (text Zone reads file with permissions, not the file names themselves?) ---this is done---",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
-      }
-    }
-  ],
-  [
-    {
-      "text": "3. Having the user set privileges on the website (modal?)",
+      "text": "1. Public files, improved schema ",
       "style": {
         "color": "rgb(0, 0, 0)",
         "bold": false,
@@ -171,7 +133,6 @@
       }
     }
   ],
-  [],
   [],
   [
     {
@@ -221,7 +182,6 @@
       }
     }
   ],
-  [],
   [],
   [
     {
