@@ -63,7 +63,7 @@ const saveOrUpdateFile = (req, res) => {
         return res.status(400).json({ error: 'Missing user context' });
     }
 
-    const { fileName, creatorName, dateCreated, lastEdited, lastEditor, fileData } = req.body;
+    const { fileName, fileType, creatorName, dateCreated, lastEdited, lastEditor, fileData } = req.body;
     if (!fileName || !fileData) {
         return res.status(400).json({
             error: 'fileName and fileData are required',
@@ -74,6 +74,7 @@ const saveOrUpdateFile = (req, res) => {
 
     try {
         // Check if fileName is in creator/fileName format
+        let fType = fileType;
         let creator = username;
         let actualFileName = fileName;
         let isExistingFile = false;
@@ -95,6 +96,7 @@ const saveOrUpdateFile = (req, res) => {
         // Also add more attributes here when the time comes
         // Yes here please do not forget
         fs.writeFileSync(filePath, JSON.stringify({
+            fType,
             creatorName,
             dateCreated,
             lastEdited,

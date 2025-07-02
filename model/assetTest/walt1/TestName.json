@@ -1,0 +1,33 @@
+{
+  "creatorName": {},
+  "dateCreated": "2025-06-28T15:47:40.103Z",
+  "lastEdited": "2025-06-28T15:47:40.103Z",
+  "lastEditor": {},
+  "fileContent": [
+    [
+      {
+        "text": "What Type of file is this?",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
+      }
+    ],
+    [],
+    [
+      {
+        "text": "New line, this should still work?",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
+      }
+    ]
+  ]
+}

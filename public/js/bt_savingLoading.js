@@ -132,6 +132,7 @@ async function saveFile() {
       // The attributes of the json file we want to create
       body: JSON.stringify({
         fileName: currentFileName, // object 1
+        fileType: "basic",
         creatorName: editor, // Fix so actual creator uif the file is new
         dateCreated: new Date().toISOString(),  // !!! !!! !!! please fix so only when file is new
         lastEdited: new Date().toISOString(),
