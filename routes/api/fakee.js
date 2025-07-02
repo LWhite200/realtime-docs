@@ -1,4 +1,5 @@
 // perhaps globals for simplicity
+/*
 let fileData = [] // everything, perhaps just name info for storage (creator,filename)
 
 // Make maps
@@ -24,5 +25,7 @@ function main() {
     // list = Get words/def
 
 
-    /* If not list, show create-screen, else the study screen */
+    // If not list, show create-screen, else the study screen
 }
+
+*/

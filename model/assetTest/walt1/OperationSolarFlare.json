@@ -1,149 +1,156 @@
-[
-  [
-    {
-      "text": "This is a document about planning and how to tackle the implementation of how to include different formats. Such as flash-cards and maps. A lot of core-mechanism for how files are stored, received, and formatted need to change.",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+{
+  "fType": "basic",
+  "creatorName": {},
+  "dateCreated": "2025-07-02T20:12:28.837Z",
+  "lastEdited": "2025-07-02T20:12:28.837Z",
+  "lastEditor": {},
+  "fileContent": [
+    [
+      {
+        "text": "This is a document about planning and how to tackle the implementation of how to include different formats. Such as flash-cards and maps. A lot of core-mechanism for how files are stored, received, and formatted need to change.",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
-  ],
-  [],
-  [
-    {
-      "text": "------ Front-end ------",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+    ],
+    [],
+    [
+      {
+        "text": "------ Front-end ------",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
-  ],
-  [
-    {
-      "text": "- The flashcard mechanics: show a single card and the 'front'/'back' side of it.",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+    ],
+    [
+      {
+        "text": "- The flashcard mechanics: show a single card and the 'front'/'back' side of it.",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
-  ],
-  [
-    {
-      "text": "- Allowing the user to input a list of \"words/definitions\" and send store request to the server. (perhaps multiple 'sides' as computers don't have retraint)",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+    ],
+    [
+      {
+        "text": "- Allowing the user to input a list of \"words/definitions\" and send store request to the server. (perhaps multiple 'sides' as computers don't have retraint)",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
-  ],
-  [
-    {
-      "text": "- The above means showing multiple screens, keep on a single html file if possible. The main screen is 'void' and the create/study screens are modals????",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+    ],
+    [
+      {
+        "text": "- The above means showing multiple screens, keep on a single html file if possible. The main screen is 'void' and the create/study screens are modals????",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
-  ],
-  [
-    {
-      "text": "- Do we change/update the basicText.html to handle these new different formats, like it calls a custom helper from /public to get html/js based on the url/file???",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+    ],
+    [
+      {
+        "text": "- Do we change/update the basicText.html to handle these new different formats, like it calls a custom helper from /public to get html/js based on the url/file???",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
-  ],
-  [
-    {
-      "text": "- How does textZone.html display the file types available for the user to choose and pass the request to the server for that file.",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+    ],
+    [
+      {
+        "text": "- How does textZone.html display the file types available for the user to choose and pass the request to the server for that file.",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
-  ],
-  [],
-  [
-    {
-      "text": "------ Back-end ------",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+    ],
+    [],
+    [
+      {
+        "text": "------ Back-end ------",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
-  ],
-  [
-    {
-      "text": "- How do we store/fetch the formats Different folders for each type under each user?",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+    ],
+    [
+      {
+        "text": "- How do we store/fetch the formats Different folders for each type under each user?",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
-  ],
-  [
-    {
-      "text": "- Query all the data for textZone.html. Most recently viewed should be top. Filter by format. Allow different filtering",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+    ],
+    [
+      {
+        "text": "- Query all the data for textZone.html. Most recently viewed should be top. Filter by format. Allow different filtering",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
-  ],
-  [],
-  [
-    {
-      "text": "------ Files and Information ------",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+    ],
+    [],
+    [
+      {
+        "text": "------ Files and Information ------",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
-  ],
-  [
-    {
-      "text": "- Update the information that a .json file stores -> { creator, date created, file type, *actual information in it's respected format*. }",
-      "style": {
-        "color": "rgb(0, 0, 0)",
-        "bold": false,
-        "italic": false,
-        "underline": false,
-        "fontSize": 16
+    ],
+    [
+      {
+        "text": "- [done] ---  Update the information that a .json file stores -> { creator, date created, file type, *actual information in it's respected format*. }",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
       }
-    }
+    ]
   ]
-]
+}

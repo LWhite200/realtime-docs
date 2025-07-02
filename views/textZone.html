@@ -30,6 +30,25 @@
     </div>
   </div>
 
+
+  <!-- Modal for asking format of the new file -->
+   <div id="createFileModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h3>Create a New File</h3>
+
+      <label for="fileFormatSelect">Select format:</label>
+      <select id="fileFormatSelect">
+        <option value="basic">Basic</option>
+        <option value="flashcard">Flashcard</option>
+        <option value="map">Map</option>
+      </select>
+
+      <br><br>
+      <button onclick="createNewFile()">Create</button>
+      <button onclick="closeCreateFileModal()">Cancel</button>
+    </div>
+  </div>
+
  
   <script src="js/authHelper.js"></script> <!-- Access to refreshing token and verification -->
   <script>
@@ -83,10 +102,14 @@
 
           // Link to the file
           const link = document.createElement('a');
-          link.href = `/BasicText?file=${encodeURIComponent(fileName)}`;
           const fileParts = fileName.split('/');
-          link.textContent = `${fileParts[1]} [${fileParts[0]}]`;
+
+          // 1=fileName, 0=creatorName, 2=fileType
+          link.textContent = `${fileParts[1]} [${fileParts[0]}] [${fileParts[2]}]`;
+          // this won't work jeez for the love of all that is good if (!fileParts[2] || fileParts[2] === "undefined") fileParts[2] = 'N/A';
           li.appendChild(link);
+
+          link.href = `/BasicText?file=${encodeURIComponent(`${fileParts[0]}/${fileParts[1]}`)}`; // remove the fileType
 
           // Button for options
           const optionsBtn = document.createElement('button');
@@ -107,6 +130,8 @@
       try {
         const [creator, actualFileName] = fileName.split('/');
         const url = `${API_BASE_URL}/assets/download/${encodeURIComponent(creator)}/${encodeURIComponent(actualFileName)}`;
+
+        console.log(`${url}`)
 
         const response = await fetchWithAuth(url, { method: 'GET' });
 
@@ -161,19 +186,32 @@
 
     //--------------------------------------------------------------
     // Modal functionality
-    let currentFileName = '';
+    // These are the current ones being looked at
+    let FileName = '';
+    let FileCreator = '';
+    let FileFormat = '';
+    let FileLocation = '';
 
 
     function openModal(fullFileName) {
       
-      const [creator, actualFileName] = fullFileName.split('/');
-      currentFileName = actualFileName;
+      const [creator, actualFileName, fileType] = fullFileName.split('/');
+      FileName = actualFileName;
+      FileCreator = creator;
+      FileFormat = fileType;
+      FileLocation = (creator + "/" + actualFileName).toString();
 
-      document.getElementById('modalFileName').textContent = "File Name: " + actualFileName;
+      console.log(`FileName: ${FileName}`);
+      console.log(`FileCreator: ${FileCreator}`);
+      console.log(`FileFormat: ${FileFormat}`);
+      console.log(`FileLocation: ${FileLocation}`);
+      
+
+      document.getElementById('modalFileName').textContent = "File Name: " + FileName + "." + FileFormat + " by " + FileCreator;
 
       const modal = document.getElementById('optionsModal');
 
-      const isCreator = creator === currentUser;
+      const isCreator = FileCreator === currentUser;
 
       // Always show download and cancel
       modal.querySelector('button[onclick="handleDownload()"]').style.display = 'inline-block';
@@ -193,7 +231,10 @@
 
     function closeModal() {
       const modal = document.getElementById('optionsModal');
-      currentFileName = '';
+      FileName = '';
+      FileCreator = '';
+      FileFormat = '';
+      FileLocation = '';
 
       modal.querySelectorAll('button').forEach(btn => {
         btn.style.display = 'none';
@@ -204,12 +245,12 @@
 
 
     async function handleDownload() {
-      await downloadFile(currentFileName);
+      await downloadFile(FileLocation);
     }
 
     async function handleDelete() {
-      if (confirm(`Delete "${currentFileName}"?`)) {
-        await deleteFile(currentFileName);
+      if (confirm(`Delete "${FileLocation}"?`)) {
+        await deleteFile(FileLocation);
         closeModal();
         fetchFiles();
       }
@@ -217,6 +258,9 @@
 
 
     async function renameFile(oldName, newName) {
+
+      console.log(`old: ${oldName} ___ new: ${newName}`);
+
       try {
         const response = await fetchWithAuth(`${API_BASE_URL}/assets/rename`, {
           method: 'PUT',
@@ -227,9 +271,8 @@
         if (!response.ok) {
           const errorMsg = await response.text();
           throw new Error(`Rename failed: ${response.statusText} - ${errorMsg}`);
-        }
-        else {
-          alert(`${response.statusText}`)
+        } else {
+          alert(`${response.statusText}`);
         }
         return true;
       } catch (error) {
@@ -238,11 +281,12 @@
       }
     }
 
+
     // Why does nothing ever work???
     async function handleRename() {
       const newName = prompt("Enter new file name:");
       if (newName) {
-        await renameFile(currentFileName, newName);
+        await renameFile(FileName, newName);
         closeModal();
         fetchFiles();
       }
@@ -256,7 +300,7 @@
         const response = await fetchWithAuth(`${API_BASE_URL}/assets/grantAccess`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ currentFileName, grantName })
+          body: JSON.stringify({ FileName, grantName })
         });
 
         if (!response.ok) {
@@ -287,11 +331,37 @@
     }
 
 
+
+
+
+    function openCreateFileModal() {
+      document.getElementById('createFileModal').style.display = 'flex';
+    }
+
+    function closeCreateFileModal() {
+      document.getElementById('createFileModal').style.display = 'none';
+    }
+
+    function createNewFile() {
+      const format = document.getElementById('fileFormatSelect').value;
+
+      if (format === 'basic') {
+        window.location.href = '/BasicText';
+      } else if (format === 'flashcard') {
+        window.location.href = '/FlashCardText';
+      } else if (format === 'map') {
+        window.location.href = '/MapText';
+      }
+
+      closeCreateFileModal();
+    }
+
+
+
     //--------------------------------------------------------------
     // The button for BasicText. Simple, do not forget
-    document.getElementById('createFileBtn').onclick = function () {
-      window.location.href = '/BasicText';
-    };
+    document.getElementById('createFileBtn').onclick = openCreateFileModal; 
+
   </script>
 
 </body>

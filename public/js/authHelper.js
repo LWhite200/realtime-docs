@@ -26,6 +26,7 @@ async function refreshToken() {
 
 //----------------------------------------------------------
 // Check validity of token. If needed, refreshes it.
+// I do not even knwow if this fucking works and I'm getting angry
 async function checkToken() {
   let token = localStorage.getItem('accessToken');
 
@@ -34,6 +35,7 @@ async function checkToken() {
     throw new Error('No access token');
   }
 
+  // This is an issue line, wtf is /tokenCheck???
   const testResponse = await fetch(`${API_BASE_URL}/tokenCheck`, {
     method: 'GET',
     headers: {

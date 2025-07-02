@@ -36,6 +36,10 @@ router.get('/BasicText', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'BasicText.html'));
 });
 
+router.get('/FlashCardText', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'views', 'FlashCardText.html'));
+});
+
 router.get('/customFormats', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'WB.html'));
 });

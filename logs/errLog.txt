@@ -43,3 +43,9 @@
 20250602	16:16:58	3340c9f1-3740-45a9-b5fe-42e4d6e7a709	TypeError: getFileIndex(...).filter is not a function
 20250602	16:24:22	47fd15a2-1282-456d-b8f7-d560b0a493d8	ReferenceError: Cannot access 'fileName' before initialization
 20250602	16:51:56	e3fd6721-7583-4140-b3d5-f657d170aaba	TypeError: The "path" argument must be of type string. Received undefined
+20250702	11:28:57	c4286454-46d8-4723-9344-bf0a1a160e27	TypeError: Cannot read properties of undefined (reading 'toString')
+20250702	11:28:59	996fcfbd-6164-4bfc-903a-a3b3d61cc589	TypeError: Cannot read properties of undefined (reading 'toString')
+20250702	16:19:12	61526796-edff-43cb-8bcf-e676dd11f21e	TypeError: console.long is not a function
+20250702	16:31:03	be744608-f985-4e6b-ab5a-92845424a365	TypeError: console.long is not a function
+20250702	16:33:18	44d3504b-4ca3-480c-a2f1-6180a7ed1fd5	TypeError: console.long is not a function
+20250702	16:43:49	3cf138b1-c182-4c98-862f-83b10cb8d277	ReferenceError: currentFileName is not defined

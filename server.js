@@ -56,6 +56,7 @@ app.use('/logout', require('./routes/logout'));
 // PROTECTED ROUTES that must pass verification before the server handles the request.
 // If verified, request send to the requested 'library' -> /routes/api/employee for employee data
 app.use(verifyJWT); 
+app.use('/tokenCheck', require('./routes/api/tokenCheck'));
 app.use('/getInfo', require('./routes/api/getInfo'));      // Info on each individual person
 app.use('/assets', require('./routes/api/assets'));        // Date files, like json or images for each person
 app.use('/employees', require('./routes/api/employees'));  // data of all individuals in DB

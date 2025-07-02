@@ -320,6 +320,28 @@ const downloadFile = (req, res) => {
     }
 };
 
+
+
+
+
+function getDataWithInfo(creator, fileName) {
+    const filePath = path.join(assetsLocation, creator, `${fileName}.json`);
+
+    if (!fs.existsSync(filePath)) {
+        return "NA";
+    }
+
+    try {
+        const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+        return data.fType || "NA";
+    } catch (err) {
+        console.error(`Failed to read or parse file ${filePath}:`, err.message);
+        return "NA";
+    }
+}
+
+
+// get all files relevent to the user, one's they can
 const getAllFiles = (req, res) => {
     const username = req.user;
     const assetMap = getAssetMap();
@@ -341,9 +363,11 @@ const getAllFiles = (req, res) => {
             filesToRemove.push(fileName);
             continue;
         }
+
+        curFileType = getDataWithInfo(fileInfo.creator, fileName);
         
         // Format: creator/fileName
-        files.push(`${fileInfo.creator}/${fileName}`);
+        files.push(`${fileInfo.creator}/${fileName}/${curFileType}`);
     }
 
     // Clean up orphaned files
@@ -370,12 +394,16 @@ const renameFile = (req, res) => {
     const creator = req.user;
     const { oldName, newName } = req.body;
 
-    if (!creator || !oldName || !newName) {
-        return res.status(400).json({ message: 'Both old and new file names are required.' });
+    if (!creator) {
+        return res.status(66).json({ message: 'Both old and new file names are required.' });
     }
 
     const oldPath = path.join(assetsLocation, creator, oldName + '.json');
     const newPath = path.join(assetsLocation, creator, newName + '.json');
+
+    console.log(`${oldPath}`)
+    console.log(`${newPath}`)
+    console.log(`oldName: ${oldName} + newName: ${newName}`)
 
     if (!fs.existsSync(oldPath)) {
         return res.status(404).json({ message: 'Original file does not exist.' });
@@ -405,16 +433,18 @@ const renameFile = (req, res) => {
 
 const grantAccess = (req, res) => {
     const accessGiver = req.user;
-    const { currentFileName, grantName } = req.body;
+    const { FileName, grantName } = req.body;
 
-    if (!accessGiver || !currentFileName || !grantName) {
+    console.log(`-------------Grant Access for ${FileName} for user ${grantName}`);
+
+    if (!accessGiver || !FileName || !grantName) {
         return res.status(400).json({ message: 'Missing required parameters.' });
     }
 
     const assetMap = getAssetMap();
 
     // Check if the accessGiver actually has the file
-    const fileMeta = assetMap[accessGiver]?.[currentFileName];
+    const fileMeta = assetMap[accessGiver]?.[FileName];
     if (!fileMeta) {
         return res.status(404).json({ message: 'File not found under your access.' });
     }
@@ -442,7 +472,7 @@ const grantAccess = (req, res) => {
         assetMap[grantName] = {};
     }
 
-    assetMap[grantName][currentFileName] = {
+    assetMap[grantName][FileName] = {
         ...fileMeta,
         lastModified: new Date().toISOString()
     };
@@ -450,7 +480,7 @@ const grantAccess = (req, res) => {
     updateAssetMap(assetMap);
 
     return res.status(200).json({
-        message: `Access to "${currentFileName}" granted to ${grantName}.`
+        message: `Access to "${FileName}" granted to ${grantName}.`
     });
 };
 

@@ -1,0 +1,34 @@
+{
+  "fType": "basic",
+  "creatorName": {},
+  "dateCreated": "2025-07-02T18:29:58.372Z",
+  "lastEdited": "2025-07-02T18:29:58.372Z",
+  "lastEditor": {},
+  "fileContent": [
+    [
+      {
+        "text": "This file should save correctly or else we are totally screwed...",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
+      }
+    ],
+    [],
+    [
+      {
+        "text": "July 2, 2025",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
+      }
+    ]
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "fType": "basic",
+  "creatorName": {},
+  "dateCreated": "2025-07-02T20:14:04.098Z",
+  "lastEdited": "2025-07-02T20:14:04.098Z",
+  "lastEditor": {},
+  "fileContent": [
+    [
+      {
+        "text": "I will give this to luke",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "fontSize": 16
+        }
+      }
+    ]
+  ]
+}
