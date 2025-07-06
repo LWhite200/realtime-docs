@@ -4,7 +4,6 @@ const verifyJWT = require('../../middleware/verifyJWT');
 
 router.get('/', verifyJWT, (req, res) => {
   // If verifyJWT passes, token is valid
-  console.log("dfuigsuydgfiusyhguidfygsizyudgfuy")
   res.json({ valid: true });
 });
 

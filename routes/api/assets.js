@@ -2,6 +2,10 @@
     This is asset.js
 */
 
+/*
+    Everything needs to be updated to handle folders
+*/
+
 const express = require('express');
 const router = express.Router();
 const assetController = require('../../controllers/assetController');

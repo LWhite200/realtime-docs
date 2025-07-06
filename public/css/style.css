@@ -308,3 +308,15 @@ ul#fileList li button:hover {
 .close-modal:hover {
     color: #ffffff;
 }
+
+#fileListContainer {
+    max-height: 70vh; /* adjust as needed */
+    overflow-y: auto;
+    border: 1px solid #535353;
+    padding: 10px;
+    margin-top: 20px;
+  }
+
+  #fileList li {
+    margin-bottom: 10px;
+  }

@@ -344,49 +344,47 @@ function getDataWithInfo(creator, fileName) {
 // get all files relevent to the user, one's they can
 const getAllFiles = (req, res) => {
     const username = req.user;
+    const folder = req.query.folder || '';  // Use params, not body, for GET route
     const assetMap = getAssetMap();
 
-    // If user has no files in the asset map
-    if (!assetMap[username]) {
+    const searchLocation = (folder !== '') ? `${username}/${folder}` : username;
+
+    if (!assetMap[searchLocation]) {
         return res.json([]);
     }
 
-    // Get all files from the current user's directory
     const files = [];
     const filesToRemove = [];
-    
-    for (const fileName in assetMap[username]) {
-        const fileInfo = assetMap[username][fileName];
-        
-        // Check if original file still exists
+
+    for (const fileName in assetMap[searchLocation]) {
+        const fileInfo = assetMap[searchLocation][fileName];
+
         if (!fileExists(fileInfo.creator, fileName)) {
             filesToRemove.push(fileName);
             continue;
         }
 
-        curFileType = getDataWithInfo(fileInfo.creator, fileName);
-        
-        // Format: creator/fileName
+        const curFileType = getDataWithInfo(fileInfo.creator, fileName);
         files.push(`${fileInfo.creator}/${fileName}/${curFileType}`);
     }
 
-    // Clean up orphaned files
+    // Clean up stale entries
     if (filesToRemove.length > 0) {
         const updatedAssetMap = getAssetMap();
         for (const fileName of filesToRemove) {
-            delete updatedAssetMap[username][fileName];
+            delete updatedAssetMap[searchLocation][fileName];
         }
-        
-        // Clean up if user has no more files
-        if (Object.keys(updatedAssetMap[username]).length === 0) {
-            delete updatedAssetMap[username];
+
+        if (Object.keys(updatedAssetMap[searchLocation]).length === 0) {
+            delete updatedAssetMap[searchLocation];
         }
-        
+
         updateAssetMap(updatedAssetMap);
     }
 
     res.json(files);
 };
+
 
 
 // I finally get it to work but then forget to update the assetMap!!!

@@ -10,7 +10,9 @@
   <h1>Your Files</h1>
   <button id="createFileBtn">Create New File</button>
 
-  <ul id="fileList"> <li>Loading...</li> </ul> <!-- The file name as link and the creator -->
+  <div id="fileListContainer">
+    <ul id="fileList"><li>Loading...</li></ul>
+  </div> <!-- The file name as link and the creator -->
 
    <div>
    <button onclick="window.location.href = 'home'" style="height:52px; margin-top:16px"> Return to home screen</button>
@@ -41,6 +43,7 @@
         <option value="basic">Basic</option>
         <option value="flashcard">Flashcard</option>
         <option value="map">Map</option>
+        <option value="folder">Folder</option>
       </select>
 
       <br><br>
@@ -55,6 +58,7 @@
     const fileList = document.getElementById('fileList');
 
     let currentUser = null;
+ 
 
     (async () => {
       try {
@@ -78,13 +82,26 @@
       }
     });
 
+
+
     //--------------------------------------------------------------------
     // List the Files Client can Access
+
+    let currentPath = ''; // Track current folder looking
     async function fetchFiles() {
       try {
-        const response = await fetchWithAuth(`${API_BASE_URL}/assets`, {
+
+        // This is the request to the server
+        // So 'GET' /asset is the request, how attactch the location 
+        // How do we query the folder/no folder idk
+        // HTTP 'GET' request
+        const folder = currentPath || '';
+        const url = `${API_BASE_URL}/assets?folder=${encodeURIComponent(folder)}`;
+
+        const response = await fetchWithAuth(url, {
           method: 'GET'
         });
+        //------------------------
 
         const data = await response.json();
         fileList.innerHTML = '';
@@ -104,10 +121,24 @@
           const link = document.createElement('a');
           const fileParts = fileName.split('/');
 
-          // 1=fileName, 0=creatorName, 2=fileType
-          link.textContent = `${fileParts[1]} [${fileParts[0]}] [${fileParts[2]}]`;
+          // --- Display things, format words
+          let displayName = fileParts[1];
+          if (displayName.length > 12) {
+            displayName = displayName.substring(0, 10) + '…';
+          }
+
+          let fileType = (!fileParts[2] || fileParts[2] === 'NA') ? 'basic' : fileParts[2];
+
+          link.innerHTML = `
+            <div>
+              <strong></strong>${displayName}.${fileType}<br>
+              <strong>Creator:</strong> ${fileParts[0]}<br>
+            </div>
+          `;
           // this won't work jeez for the love of all that is good if (!fileParts[2] || fileParts[2] === "undefined") fileParts[2] = 'N/A';
           li.appendChild(link);
+
+          // For folders, the argument is passed
 
           link.href = `/BasicText?file=${encodeURIComponent(`${fileParts[0]}/${fileParts[1]}`)}`; // remove the fileType
 
@@ -123,7 +154,7 @@
         fileList.innerHTML = '<li>Failed to load data</li>';
       }
     }
-    fetchFiles();
+    fetchFiles(); // The call when the file is first opened
 
 
     async function downloadFile(fileName) {
@@ -351,9 +382,73 @@
         window.location.href = '/FlashCardText';
       } else if (format === 'map') {
         window.location.href = '/MapText';
+      } else if (format === 'folder') {
+        /* We not opening a folder file, but making one on the person's side. */
+        createFolder();
       }
 
       closeCreateFileModal();
+    }
+
+
+
+
+
+    /*
+      Create a folder
+      - Get the name of the folder
+      - send request to the server
+
+      - how display everything? database needed right now my god
+      - Do we link up with the assetMap, should every individual have an assetMap?
+
+    */
+    async function requestFolderCreation(folderName) {
+      console.log(`${folderName}`);
+
+
+
+      if (!folderName) {
+        return;
+      }
+
+      const token = await refreshToken();
+      if (!token) {
+        if (confirm('Login Error')) {
+          window.location.href = 'index';
+        }
+        return;
+      }
+      const jsonData = getEditorContentAsJson();
+      
+      try {
+        const response = await fetch('/assets', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+
+          // The attributes of the json file we want to create
+          body: JSON.stringify({
+            folderName: folderName,
+          })
+        });
+
+        if (!response.ok) throw new Error(await response.text());
+
+        alert(`Document saved as ${currentFileName}`);
+      } catch (err) {
+        alert(`Save failed: ${err.message}`);
+      }
+    }
+
+    async function createFolder() {
+      const folderName = prompt("Enter new file name:");
+      if (folderName) {
+        await requestFolderCreation(folderName); // will be within the authHelper? nah keep here
+        closeModal();
+      }
     }
 
 
