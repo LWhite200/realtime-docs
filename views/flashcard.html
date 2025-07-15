@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flash Card App</title>
+
+<style>
+
+  body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f0f0f0;
+  margin: 0;
+}
+
+.container {
+  text-align: center;
+}
+
+.card {
+  width: 300px;
+  height: 200px;
+  margin: 20px auto;
+  perspective: 1000px;
+  position: relative;
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.front, .back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.back {
+  transform: rotateY(180deg);
+}
+
+
+.controls {
+  margin-top: 10px;
+}
+
+button {
+  margin: 0 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+
+</style>
+
+</head>
+<body>
+
+  <div class="container">
+    <div class="card">
+      <div class="card-inner" id="flashcard">
+        <div class="front">Question</div>
+        <div class="back">Answer</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="prevBtn">Previous</button>
+      <button id="flipBtn">Flip</button>
+      <button id="nextBtn">Next</button>
+      <br>
+      <br>
+      <button id="addBtn">Add to Current Deck</button>
+      <button id="createBtn">Create New Deck</button>
+    </div>
+
+  </div>
+
+
+ 
+  <script>
+
+    // Basic scaffold for flashcard behavior
+
+const flashcards = [
+  { question: "What is JavaScript?", answer: "A programming language for the web." },
+  { question: "What is a closure?", answer: "A function with preserved data from its lexical scope." },
+  // Add more cards here
+];
+
+let currentIndex = 0;
+
+
+const flashcardEl = document.getElementById('flashcard');
+const frontEl = flashcardEl.querySelector('.front');
+const backEl = flashcardEl.querySelector('.back');
+
+function renderCard(index) {
+  const card = flashcards[index];
+  frontEl.textContent = card.question;
+  backEl.textContent = card.answer;
+}
+
+// Initial card render
+renderCard(currentIndex);
+
+document.getElementById('flipBtn').addEventListener('click', () => {
+  document.querySelector('.card').classList.toggle('flipped');
+});
+
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+  // previous card logic
+  // checks that index would stay in parameters 
+  let tempIndex = currentIndex - 1;
+  if(tempIndex >= 0)
+{
+    currentIndex--;
+    renderCard(currentIndex);
+}
+ 
+});
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  // next card logic
+  // checks that index would stay in parameters 
+  let tempIndex = currentIndex + 1;
+  if(tempIndex < flashcards.length)
+{
+    currentIndex++;
+    renderCard(currentIndex);
+}
+  
+});
+
+document.getElementById('addBtn').addEventListener('click', () => {
+  
+  const addWordbox = document.createElement('input');
+  const addWordLabel = document.createElement('label');
+  const addDefbox = document.createElement('input');
+  const addDefLabel = document.createElement('label');
+  const submitAddBtn = document.createElement('button');
+  const breakTag = document.createElement('br');
+  const divTag = document.createElement('div');
+  
+  // word text box setup
+  addWordLabel.textContent = 'Word';
+  addWordbox.type = 'text';
+  addWordbox.name = 'addWordCard';
+  addWordLabel.id = 'addWordInfoLabel';
+  addWordbox.id = 'addWordInfoBox';
+  addWordLabel.style.margin = '10px';
+  addWordbox.style.margin = '5px';
+  
+
+ 
+  document.querySelector('.container').appendChild(breakTag);
+  document.querySelector('.container').appendChild(addWordLabel);
+  document.querySelector('.container').appendChild(addWordbox);
+
+     // definition text box setup
+  addDefLabel.textContent = 'Definition';
+  addDefbox.type = 'text';
+  addDefbox.name = 'addDefCard';
+  addDefLabel.id = 'addDefInfoLabel';
+  addDefbox.id = 'addDefInfoBox';
+  addDefLabel.style.margin = '10px';
+  addDefbox.style.margin = '5px';
+
+   
+  document.querySelector('.container').appendChild(addDefLabel);
+  document.querySelector('.container').appendChild(addDefbox);
+
+  //submit button stuff
+  submitAddBtn.type = 'submit';
+  submitAddBtn.name = 'addCardBtn';
+  submitAddBtn.id = 'addCardInfoBtn';
+  submitAddBtn.textContent = 'add Card';
+  submitAddBtn.style.margin = '5px';
+
+
+  document.querySelector('.container').appendChild(divTag);
+ 
+  
+  
+  document.querySelector('.container').appendChild(submitAddBtn);
+
+  // event listener for the submit button 
+  submitAddBtn.addEventListener('click', () => {
+  
+  const word = document.getElementById('addWordInfoBox').value;
+  const definition = document.getElementById('addDefInfoBox').value;
+
+  flashcards[flashcards.length] = {question : word, answer : definition};
+  
+  
+  });
+
+});
+
+
+
+document.getElementById('createBtn').addEventListener('click', () => {
+  
+  
+});
+
+
+
+
+
+
+  </script>
+</body>
+</html>
+
+<!-- <script>
+    let flashcardList = []; // for studying 
+    let tempList = []; // for changes
+    //  need save button
+    
+</script> -->
