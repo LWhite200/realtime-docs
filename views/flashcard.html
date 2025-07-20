@@ -116,6 +116,12 @@ const frontEl = flashcardEl.querySelector('.front');
 const backEl = flashcardEl.querySelector('.back');
 
 function renderCard(index) {
+
+  if ( flashcards.length === 0 || !flashcards[index])
+{
+
+}
+
   const card = flashcards[index];
   frontEl.textContent = card.question;
   backEl.textContent = card.answer;
@@ -155,6 +161,7 @@ document.getElementById('nextBtn').addEventListener('click', () => {
 
 document.getElementById('addBtn').addEventListener('click', () => {
   
+  // probably a better way to do this but here we are 
   const addWordbox = document.createElement('input');
   const addWordLabel = document.createElement('label');
   const addDefbox = document.createElement('input');
@@ -211,17 +218,35 @@ document.getElementById('addBtn').addEventListener('click', () => {
   const word = document.getElementById('addWordInfoBox').value;
   const definition = document.getElementById('addDefInfoBox').value;
 
-  flashcards[flashcards.length] = {question : word, answer : definition};
+  if (flashcards[0].question === "" && flashcards[0].answer === "")  
+  {
+    flashcards[0] = {question : word, answer : definition};
+    renderCard(0);
+  }
+  else
+  {
+    flashcards[flashcards.length] = {question : word, answer : definition};
+  }
+  
   
   
   });
 
 });
 
+// could have save button if are sending shit to a DB but don't know yet, don't know the JSON shit either 
 
 
 document.getElementById('createBtn').addEventListener('click', () => {
   
+ flashcards.length = 0;
+
+ flashcards.push({question: "", answer: ""});
+
+ renderCard(0);
+ 
+
+
   
 });
 
