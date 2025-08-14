@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Study Map - Drag Boxes</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            border: 1px solid black;
+        }
+
+        #textModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border: 2px solid #000;
+            display: none;
+            z-index: 999;
+        }
+
+        #textModal textarea {
+            width: 300px;
+            height: 100px;
+        }
+
+        #modalOverlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.3);
+            display: none;
+            z-index: 998;
+        }
+    </style>
+</head>
+<body>
+
+<div style="position: absolute; top: 20px; left: 20px;">
+    <button id="save">SAVE</button>
+    <button id="info">Info</button>
+    <button id="FontSettings">Font Settings</button>
+    <button id="objectToggle">Object: Box</button>
+    <button id="deleteToggleBtn">Delete Mode: OFF</button>
+    <button id="leave">Leave Page</button>
+</div>
+
+<!-- Modal for text input -->
+<div id="modalOverlay"></div>
+<div id="textModal">
+    <textarea id="boxTextInput"></textarea><br>
+    <small><b>Info</b>Surround phrase within m//, b//, or mb// for bigger, bolder, or both,</small>
+    <small>
+        <p>
+            <span style="font-size: 1.2em;">m/<span style="font-size: 1.2em;">big</span>/</span>, 
+            <span style="font-weight: bold;">b/<span style="font-weight: bold;">bold</span>/</span>, or 
+            <span style="font-weight: bold; font-size: 1.2em;">mb/<span style="font-weight: bold; font-size: 1.2em;">BOTH</span>/</span>
+        </p>
+    </small>
+
+    <button id="saveTextBtn">Save</button>
+    <button id="cancelTextBtn">Cancel</button>
+</div>
+
+<div class="canvas-container">
+    <canvas id="mapCanvas" width="1200" height="700"></canvas>
+</div>
+
+<script>
+
+/*
+    What is left to be done???
+
+
+
+    
+
+    Info modal
+    Font Settings
+    Object Box - changing what the object
+    
+    
+    lines can be placed that go nowhere, or like bend so they can reach the intended target
+
+    serialization and saving all the data to a json object.
+
+    deleting lines
+
+
+    ___DONE___
+    --- arrows (tap on a point and it turns into or de-becomes an arrow)
+    --- Delete mode to include lines/arrows
+
+
+*/
+
+
+
+    const canvas = document.getElementById("mapCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const mouse = { x: 0, y: 0 };
+    let mouseDown = false;
+    const boxes = [];
+
+    let connections = [];
+
+    let connectionStart = null; // {box, side}
+    let isDraggingConnection = false;
+
+    const BUFFER = 5;
+    const resizeHandleSize = 10;
+
+    let draggedBox = null;
+    let resizingBox = null;
+    let resizeDirection = null;
+    let offset = { x: 0, y: 0 };
+    let deleteMode = false;
+    let editingBox = null;
+
+
+    // Toggle whether user is in DELETE MODE
+    // @ dom delete button top of page
+    const deleteToggleBtn = document.getElementById("deleteToggleBtn");
+    deleteToggleBtn.addEventListener("click", () => {
+        deleteMode = !deleteMode;
+        deleteToggleBtn.textContent = `Delete Mode: ${deleteMode ? "ON" : "OFF"}`;
+        deleteToggleBtn.style.backgroundColor = deleteMode ? "#f66" : "";
+    });
+
+    // --- Modal Text--
+    // Seems to when the save button is pressed, the text of the current box becomes 
+    // The text within the modal's box and the modal's box clears itself
+    const modal = document.getElementById("textModal");
+    const overlay = document.getElementById("modalOverlay");
+    const textarea = document.getElementById("boxTextInput");
+    document.getElementById("saveTextBtn").onclick = () => {
+        if (editingBox) {
+            editingBox.text = textarea.value;
+            editingBox = null;
+            hideModal();
+            drawAll();
+        }
+    };
+
+    // Close modal when it's cancel button is clicked
+    document.getElementById("cancelTextBtn").onclick = hideModal; 
+
+    // If there are duplicate connections:
+    // Think about it, it looks for if a->b is the same as b<-a, only one connection is needed.
+    function isDuplicateConnection(newConn) {
+        return connections.some(conn =>
+            (conn.from.box === newConn.from.box && conn.from.side === newConn.from.side &&
+            conn.to.box === newConn.to.box && conn.to.side === newConn.to.side) ||
+            (conn.from.box === newConn.to.box && conn.from.side === newConn.to.side &&
+            conn.to.box === newConn.from.box && conn.to.side === newConn.from.side)
+        );
+    }
+
+    // Simply show the modal or hide it
+    function showModal(initialText = "") {
+        textarea.value = initialText;
+        modal.style.display = "block";
+        overlay.style.display = "block";
+        textarea.focus();
+    }
+    function hideModal() {
+        modal.style.display = "none";
+        overlay.style.display = "none";
+    }
+
+    // Listener for MOUSe MOVEMENT
+    // @always listening
+    // For movement and dragging, update mouse position for other listener functions
+    canvas.addEventListener("mousemove", (e) => {
+        // Get the position of the canvas relative to the screen
+        const rect = canvas.getBoundingClientRect();
+
+        // Convert mouse coordinates from screen space to canvas space
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+
+        /* We use global booleans to determine which statemetn to do*/
+
+        // If user is in the middle of drawing a connection line
+        if (connectionStart) {
+            drawAll(); // redraw everything
+            const from = getConnectorPositions(connectionStart.box)[connectionStart.side];
+            drawArrow(from, mouse, false, true); // draw a preview arrow from box to mouse
+            return;
+        }
+
+        // If dragging an existing connection (not a box)
+        if (isDraggingConnection) {
+            drawAll(); // just redraw — no changes needed while hovering
+            return;
+        }
+
+        // If currently resizing a box
+        if (resizingBox) {
+            const old = { ...resizingBox }; // save the current box state in case we need to revert
+
+            // Calculate how far the mouse has moved from the starting point
+            const dx = mouse.x - offset.x;
+            const dy = mouse.y - offset.y;
+
+            // Adjust box dimensions based on which corner is being dragged (bottom-left, top-right, ect. )
+            if (resizeDirection === "br") { 
+                resizingBox.width = dx;
+                resizingBox.height = dy;
+            } else if (resizeDirection === "tr") { 
+                resizingBox.width = dx;
+                resizingBox.y = mouse.y;
+                resizingBox.height = old.y + old.height - mouse.y;
+            } else if (resizeDirection === "bl") { 
+                resizingBox.x = mouse.x;
+                resizingBox.width = old.x + old.width - mouse.x;
+                resizingBox.height = dy;
+            } else if (resizeDirection === "tl") { 
+                resizingBox.x = mouse.x;
+                resizingBox.y = mouse.y;
+                resizingBox.width = old.x + old.width - mouse.x;
+                resizingBox.height = old.y + old.height - mouse.y;
+            }
+
+            // Revert changes if the box is too small or overlaps others
+            if (resizingBox.width < 20 || resizingBox.height < 20 || isBoxOverlappingAny(resizingBox)) {
+                Object.assign(resizingBox, old); // restore previous size/position
+            }
+
+            drawAll(); // redraw everything
+            return;
+        }
+
+        // If dragging a box
+        if (draggedBox) {
+            const newX = mouse.x - offset.x;
+            const newY = mouse.y - offset.y;
+            const oldX = draggedBox.x;
+            const oldY = draggedBox.y;
+
+            // Move the box with the mouse
+            draggedBox.x = newX;
+            draggedBox.y = newY;
+
+            // Check for overlaps. If none, keep the move. Otherwise, revert.
+            if (!isBoxOverlappingAny(draggedBox)) {
+                drawAll(); // update canvas
+            } else {
+                draggedBox.x = oldX;
+                draggedBox.y = oldY;
+            }
+        }
+
+        // Handle cursor changes for resize/move hints
+        let hovering = false;
+        for (let box of boxes) {
+            const corner = getResizeCorner(mouse.x, mouse.y, box); // is mouse on a corner?
+
+            if (corner && !deleteMode) {
+                // If on a corner, show appropriate resize cursor
+                canvas.style.cursor = {
+                    br: "se-resize",
+                    tl: "nw-resize",
+                    tr: "ne-resize",
+                    bl: "sw-resize"
+                }[corner];
+                hovering = true;
+                break;
+            } else if (isMouseOnBorder(mouse.x, mouse.y, box) && !deleteMode) {
+                // If on the edge, show move cursor
+                canvas.style.cursor = "move";
+                hovering = true;
+                break;
+            }
+        }
+
+        // Default cursor if not hovering over any interactive area
+        if (!hovering && !draggedBox && !resizingBox) {
+            canvas.style.cursor = deleteMode ? "not-allowed" : "default";
+        }
+    });
+
+
+
+    function pointToLineDistance(point, lineStart, lineEnd) {
+        const { x, y } = point;
+        const { x: x1, y: y1 } = lineStart;
+        const { x: x2, y: y2 } = lineEnd;
+
+        const A = x - x1;
+        const B = y - y1;
+        const C = x2 - x1;
+        const D = y2 - y1;
+
+        const dot = A * C + B * D;
+        const lenSq = C * C + D * D;
+        let param = -1;
+        if (lenSq !== 0) param = dot / lenSq;
+
+        let xx, yy;
+        if (param < 0) {
+            xx = x1;
+            yy = y1;
+        } else if (param > 1) {
+            xx = x2;
+            yy = y2;
+        } else {
+            xx = x1 + param * C;
+            yy = y1 + param * D;
+        }
+
+        const dx = x - xx;
+        const dy = y - yy;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+
+    function distance(p1, p2) {
+        return Math.hypot(p1.x - p2.x, p1.y - p2.y);
+    }
+
+    canvas.addEventListener("mousedown", (e) => {
+        if (mouseDown) return;
+        mouseDown = true;
+
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+
+        if (deleteMode) {
+            for (let i = 0; i < connections.length; i++) {
+                const conn = connections[i];
+                const start = getConnectorPositions(conn.from.box)[conn.from.side];
+                const end = getConnectorPositions(conn.to.box)[conn.to.side];
+                const distToLine = pointToLineDistance(mouse, start, end);
+                if (distToLine < 6) {  // threshold, tweak if needed
+                if (confirm("Delete this connection?")) {
+                    connections.splice(i, 1);
+                    drawAll();
+                    return; // stop processing further on this click
+                }
+                }
+            }
+        }
+
+
+        // Toggle arrowhead if near connector
+        for (let conn of connections) {
+            const fromPos = getConnectorPositions(conn.from.box)[conn.from.side];
+            const toPos = getConnectorPositions(conn.to.box)[conn.to.side];
+
+            if (distance(mouse, fromPos) < 8) {
+                conn.fromArrow = !conn.fromArrow;
+                drawAll();
+                return;
+            }
+            if (distance(mouse, toPos) < 8) {
+                conn.toArrow = !conn.toArrow;
+                drawAll();
+                return;
+            }
+        }
+
+        // Toggle line arrowhead
+        for (let conn of connections) {
+            const start = getConnectorPositions(conn.from.box)[conn.from.side];
+            const end = getConnectorPositions(conn.to.box)[conn.to.side];
+            const distToLine = pointToLineDistance(mouse, start, end);
+            if (distToLine < 6) {
+                conn.showArrowHead = !conn.showArrowHead;
+                drawAll();
+                return;
+            }
+        }
+
+        for (let i = 0; i < boxes.length; i++) {
+            const box = boxes[i];
+
+            const connector = getConnectorAt(mouse.x, mouse.y);
+            if (connector) {
+                connectionStart = connector;
+                isDraggingConnection = true;
+                return;
+            }
+
+            if (deleteMode && isMouseInsideBox(mouse.x, mouse.y, box)) {
+                if (confirm("Delete this box and its connections?")) {
+                    // Remove the box
+                    boxes.splice(i, 1);
+
+                    // Remove all connections where the box is involved
+                    connections = connections.filter(conn => 
+                        conn.from.box !== box && conn.to.box !== box
+                    );
+
+                    drawAll();
+                }
+                return;
+            }
+
+
+            const corner = getResizeCorner(mouse.x, mouse.y, box);
+            if (corner) {
+                resizingBox = box;
+                resizeDirection = corner;
+                offset.x = (corner === "br" || corner === "tr") ? box.x : box.x + box.width;
+                offset.y = (corner === "br" || corner === "bl") ? box.y : box.y + box.height;
+                return;
+            }
+
+            if (isMouseOnBorder(mouse.x, mouse.y, box)) {
+                draggedBox = box;
+                offset.x = mouse.x - box.x;
+                offset.y = mouse.y - box.y;
+                return;
+            }
+
+            if (isMouseInsideBox(mouse.x, mouse.y, box)) {
+                editingBox = box;
+                showModal(box.text || "");
+                return;
+            }
+        }
+
+        if (!deleteMode) {
+            createBox(mouse.x, mouse.y);
+        }
+    });
+
+    canvas.addEventListener("mouseup", (e) => {
+        mouseDown = false;
+
+        draggedBox = null;
+        resizingBox = null;
+        resizeDirection = null;
+
+        if (!connectionStart) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const mouse = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+
+        const connector = getConnectorAt(mouse.x, mouse.y);
+        if (connector) {
+            const newConn = {
+                from: connectionStart,
+                to: connector,
+                fromArrow: false,
+                toArrow: false
+            };
+
+            if (!isDuplicateConnection(newConn)) {
+                connections.push(newConn);
+            }
+        }
+
+        connectionStart = null;
+        isDraggingConnection = false;
+        drawAll();
+    });
+
+
+    function getResizeCorner(x, y, box) {
+        const corners = {
+            tl: [box.x, box.y],
+            tr: [box.x + box.width, box.y],
+            bl: [box.x, box.y + box.height],
+            br: [box.x + box.width, box.y + box.height],
+        };
+        for (let [key, [cx, cy]] of Object.entries(corners)) {
+            if (Math.abs(x - cx) < resizeHandleSize && Math.abs(y - cy) < resizeHandleSize) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    function isMouseInsideBox(x, y, box) {
+        return x >= box.x && x <= box.x + box.width && y >= box.y && y <= box.y + box.height;
+    }
+
+    function isMouseOnBorder(x, y, box, borderWidth = 5) {
+        const withinOuter = x >= box.x - borderWidth && x <= box.x + box.width + borderWidth &&
+                            y >= box.y - borderWidth && y <= box.y + box.height + borderWidth;
+        const withinInner = x > box.x + borderWidth && x < box.x + box.width - borderWidth &&
+                            y > box.y + borderWidth && y < box.y + box.height - borderWidth;
+        return withinOuter && !withinInner;
+    }
+
+    function isBoxOverlappingAny(targetBox, buffer = BUFFER) {
+        return boxes.some(box => {
+            if (box === targetBox) return false;
+            return !(
+                targetBox.x + targetBox.width + buffer < box.x - buffer ||
+                targetBox.x - buffer > box.x + box.width + buffer ||
+                targetBox.y + targetBox.height + buffer < box.y - buffer ||
+                targetBox.y - buffer > box.y + box.height + buffer
+            );
+        });
+    }
+
+
+    function getConnectorPositions(box) {
+        return {
+            top: { x: box.x + box.width / 2, y: box.y },
+            bottom: { x: box.x + box.width / 2, y: box.y + box.height },
+            left: { x: box.x, y: box.y + box.height / 2 },
+            right: { x: box.x + box.width, y: box.y + box.height / 2 },
+        };
+    }
+
+
+
+    function getConnectionPoints(fromBox, toBox) {
+        const fromCenters = [
+            { x: fromBox.x + fromBox.width / 2, y: fromBox.y, dir: "top" },
+            { x: fromBox.x + fromBox.width / 2, y: fromBox.y + fromBox.height, dir: "bottom" },
+            { x: fromBox.x, y: fromBox.y + fromBox.height / 2, dir: "left" },
+            { x: fromBox.x + fromBox.width, y: fromBox.y + fromBox.height / 2, dir: "right" }
+        ];
+        const toCenters = [
+            { x: toBox.x + toBox.width / 2, y: toBox.y, dir: "top" },
+            { x: toBox.x + toBox.width / 2, y: toBox.y + toBox.height, dir: "bottom" },
+            { x: toBox.x, y: toBox.y + toBox.height / 2, dir: "left" },
+            { x: toBox.x + toBox.width, y: toBox.y + toBox.height / 2, dir: "right" }
+        ];
+
+        let minDist = Infinity;
+        let best = { from: fromCenters[0], to: toCenters[0] };
+
+        for (let f of fromCenters) {
+            for (let t of toCenters) {
+                const dist = Math.hypot(f.x - t.x, f.y - t.y);
+                if (dist < minDist) {
+                    minDist = dist;
+                    best = { from: f, to: t };
+                }
+            }
+        }
+
+        return best;
+    }
+
+
+    function getConnectorAt(x, y) {
+        for (let box of boxes) {
+            const connectors = getConnectorPositions(box);
+            for (let side in connectors) {
+                const pos = connectors[side];
+                const dx = x - pos.x;
+                const dy = y - pos.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 8) {
+                    return { box, side };
+                }
+            }
+        }
+        return null;
+    }
+
+
+    function createBox(x, y) {
+        const proposedBox = {
+            x: x - 50,
+            y: y - 50,
+            width: 100,
+            height: 80,
+            text: ""
+        };
+        if (isBoxOverlappingAny(proposedBox)) return;
+
+        boxes.push(proposedBox);
+        drawAll();
+    }
+
+    /* test message
+
+    m/this is a message/
+
+    b/bold message my guy/
+
+    bm/both ha ha/
+
+    normal text nothing here
+
+    */
+
+
+    function drawWrappedText(box) {
+        const padding = 12;
+        const lineSpacing = 1.3;
+        let baseFontSize = 16;
+        const maxWidth = box.width - padding * 2;
+        const maxHeight = box.height - padding * 2;
+
+        const rawText = box.text || "";
+        const paragraphs = rawText.split(/\r?\n/);
+
+        // Parse inline styled segments
+        function parseInline(text) {
+            const segments = [];
+            const regex = /([a-z]+)\/(.*?)\//g;
+            let lastIndex = 0;
+            let match;
+            while ((match = regex.exec(text)) !== null) {
+                if (match.index > lastIndex) {
+                    segments.push({ text: text.slice(lastIndex, match.index), bold: false, large: false });
+                }
+                const flags = match[1];
+                segments.push({
+                    text: match[2],
+                    bold: flags.includes('b'),
+                    large: flags.includes('m'),
+                });
+                lastIndex = regex.lastIndex;
+            }
+            if (lastIndex < text.length) {
+                segments.push({ text: text.slice(lastIndex), bold: false, large: false });
+            }
+            return segments;
+        }
+
+        // === LAYOUT PHASE ===
+        let lines = [];
+        let lineHeight = baseFontSize * lineSpacing;
+
+        for (let paragraph of paragraphs) {
+            const indent = paragraph.match(/^(\s+)/)?.[0] || "";
+            const parsedSegments = parseInline(paragraph.trim());
+
+            let currentLine = [];
+            let currentWidth = ctx.measureText(indent).width;
+
+            for (let segment of parsedSegments) {
+                const fontWeight = segment.bold ? "bold" : "normal";
+                const fontSize = segment.large ? baseFontSize + 8 : baseFontSize;
+                ctx.font = `${fontWeight} ${fontSize}px sans-serif`;
+
+                const words = segment.text.split(/(\s+)/);
+                for (let word of words) {
+                    const wordWidth = ctx.measureText(word).width;
+                    if (currentWidth + wordWidth > maxWidth && currentLine.length > 0) {
+                        lines.push(currentLine);
+                        currentLine = [];
+                        currentWidth = 0;
+                    }
+                    currentLine.push({ ...segment, text: word, font: ctx.font });
+                    currentWidth += wordWidth;
+                }
+            }
+
+            if (currentLine.length > 0) {
+                lines.push(currentLine);
+            } else if (paragraph.trim() === "") {
+                lines.push([]); // preserve blank lines
+            }
+        }
+
+        const totalTextHeight = lines.length * lineHeight;
+        const buffer = lineHeight * 0.5; // half a line of leniency
+        const overflow = totalTextHeight - buffer > maxHeight;
+
+        // === RENDER PHASE ===
+        let y = box.y + padding + (maxHeight - totalTextHeight) / 2 + baseFontSize;
+
+        for (let line of lines) {
+            let lineWidth = 0;
+            for (let seg of line) {
+                ctx.font = seg.font;
+                lineWidth += ctx.measureText(seg.text).width;
+            }
+
+            let x = box.x + (box.width - lineWidth) / 2;
+            for (let seg of line) {
+                ctx.font = seg.font;
+                ctx.fillStyle = "black";
+                ctx.fillText(seg.text, x, y);
+                x += ctx.measureText(seg.text).width;
+            }
+
+            y += lineHeight;
+        }
+
+        return overflow;
+    }
+
+
+    function drawConnections() {
+        for (let conn of connections) {
+            const from = getConnectorPositions(conn.from.box)[conn.from.side];
+            const to = getConnectorPositions(conn.to.box)[conn.to.side];
+
+            // main line
+            drawArrow(from, to, conn.toArrow);
+
+            // optional reverse arrow
+            if (conn.fromArrow) {
+            drawArrow(to, from, true);
+            }
+        }
+    }
+
+
+
+
+
+
+
+    function drawArrow(from, to, showHead = true, isPreview = false) {
+        const headLength = 25;
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const angle = Math.atan2(dy, dx);
+
+        ctx.strokeStyle = isPreview ? "orange" : "#444";
+        ctx.lineWidth = isPreview ? 3 : 2;
+        ctx.setLineDash(isPreview ? [4, 4] : []);
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.stroke();
+
+        if (showHead) {
+            ctx.beginPath();
+            ctx.moveTo(to.x, to.y);
+            ctx.lineTo(
+            to.x - headLength * Math.cos(angle - Math.PI / 6),
+            to.y - headLength * Math.sin(angle - Math.PI / 6)
+            );
+            ctx.lineTo(
+            to.x - headLength * Math.cos(angle + Math.PI / 6),
+            to.y - headLength * Math.sin(angle + Math.PI / 6)
+            );
+            ctx.closePath();
+            ctx.fillStyle = isPreview ? "orange" : "#444";
+            ctx.fill();
+        }
+
+        ctx.setLineDash([]);
+    }
+
+
+
+
+    function drawBox(box, overflow = false) {
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = overflow ? "red" : "#000000";
+        ctx.lineWidth = 3;
+        ctx.fillRect(box.x, box.y, box.width, box.height);
+        ctx.strokeRect(box.x, box.y, box.width, box.height);
+
+        // Draw corner resize handles
+        ctx.fillStyle = "#000000";
+        for (let [cx, cy] of [
+            [box.x, box.y],
+            [box.x + box.width, box.y],
+            [box.x, box.y + box.height],
+            [box.x + box.width, box.y + box.height]
+        ]) {
+            ctx.fillRect(cx - 3, cy - 3, 6, 6);
+        }
+
+        // Draw connector dots
+        const connectors = getConnectorPositions(box);
+        for (let pos of Object.values(connectors)) {
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
+            ctx.fillStyle = "blue";
+            ctx.fill();
+        }
+
+        drawWrappedText(box);
+    }
+
+
+
+    function drawAll() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawConnections();
+        for (let box of boxes) {
+            const overflow = drawWrappedText(box); // keep drawing + overflow
+            drawBox(box, overflow);                // don't call drawWrappedText inside drawBox
+        }
+    }
+
+
+
+    /*
+        ___ How This Code Works ___
+
+        
+
+
+
+    */
+
+
+</script>
+
+</body>
+</html>

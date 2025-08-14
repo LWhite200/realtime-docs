@@ -40,6 +40,10 @@ router.get('/FlashCardText', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'FlashCardText.html'));
 });
 
+router.get('/MapText', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'views', 'MapText.html'));
+});
+
 router.get('/customFormats', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'WB.html'));
 });
