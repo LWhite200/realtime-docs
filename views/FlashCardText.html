@@ -1,19 +1,277 @@
-<!-- Add this near the top of your file -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Text Editor</title>
-  <!-- Link to custom styles for the editor -->
-  <link rel="stylesheet" href="css/stylesText.css" />
+    <title>Flashcards</title>
 </head>
-<body>
+<body onload="OnLoad()">
 
-  <h1>FlashCardText</h1>
+    
 
-  <p>This works</p>
-  
- 
+    <div id="studyModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgb(0, 0, 0);">
+        <div style="background:rgb(255, 0, 0); margin:100px auto; padding:20px; width:300px; position:relative;">
+            <p>Study modal</p>
+
+            <div>
+                <p id="curWord"></p>
+                <p id = "wordFace">Word</p>
+                <p id = "cardNumber">0</p>
+
+                <div>
+                    <button onclick="changeCard(-1)">back</button>
+                    <button onclick="changeCard(0)">Flip</button>
+                    <button onclick="changeCard(1)">forward</button>
+                </div>
+            </div>
+
+            <button onclick="changeModal()">Create New Deck</button>
+            <button onclick="saveFile()">Save Deck</button>
+        </div>
+    </div>
+
+    <div id="creationModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div style="background:rgb(0, 132, 255); margin:100px auto; padding:20px; width:300px; position:relative;">
+            <p>Creation Modal</p>
+            <button onclick="changeModal()">Study The Deck</button>
+        </div>
+    </div>
+
+     
+
+    <script>
+        let mode = 0;
+        let curWord = 0;
+        let curFlipped = 0;
+        let cardList = {"Aleah":"is my girlfriend", "she is...":"beautiful and muscle-man", "tres":"three", "cuatro":"four", "cinco":"five"};
+        let currentFileName = "FlashSaveTest";
+
+
+        //----------------------------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------------------------
+
+
+        // puts the global 'cardList' array into a json object (no name, just word : defintion)
+        async function getFlashCardDeckJson() {
+            return { content: cardList };
+        }
+
+        async function saveFile() {
+            console.log(`${currentFileName}`);
+            /*
+            if (!currentFileName) {
+                openFileNameModal(saveFile);
+                return;
+            }
+            */
+
+            const token = await refreshToken();
+            if (!token) {
+                if (confirm('You need to login to save. Return to login screen?')) {
+                window.location.href = 'index';
+                }
+                return;
+            }
+            
+            const jsonData = await getFlashCardDeckJson();
+
+            
+            try {
+                const response = await fetch('/assets', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+
+                // The attributes of the json file we want to create
+                body: JSON.stringify({
+                    fileName: currentFileName, // object 1
+                    fileType: "flash",
+                    creatorName: "", // Fix so actual creator uif the file is new
+                    dateCreated: new Date().toISOString(),  // !!! !!! !!! please fix so only when file is new
+                    lastEdited: new Date().toISOString(),
+                    lastEditor: "",
+                    fileData: jsonData.content // object
+                })
+                });
+
+                if (!response.ok) throw new Error(await response.text());
+
+                alert(`Document saved as ${currentFileName}`);
+            } catch (err) {
+                alert(`Save failed: ${err.message}`);
+            }
+        }
+
+
+        // Handling each request with checking the validity of the tokens and refreshing them as needed
+        async function refreshToken() {
+            try {
+                const response = await fetch('/refresh', {
+                method: 'GET',
+                credentials: 'include'
+                });
+                if (!response.ok) throw new Error('Token refresh failed');
+                const data = await response.json();
+                return data.accessToken;
+            } catch (err) {
+                console.error('Token refresh failed:', err);
+                return null;
+            }
+        }
+
+        async function loadFileFromServer(fileName) {
+            try {
+                const token = await refreshToken();
+                if (!token) {
+                    if (confirm('Not logged in. Return to login screen?')) {
+                        window.location.href = 'index';
+                    }
+                    return;
+                }
+
+                const response = await fetch(`/assets/${fileName}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error(`Failed to fetch file: ${response.statusText}`);
+
+                const { fileName: returnedFileName, content } = await response.json();
+
+                // Instead of calling undefined loadStyledContent:
+                // Update the global cardList with loaded data
+                cardList = content.fileContent || content;
+
+                // Show the study screen after loading
+                showDisplayScreen();
+            } catch (err) {
+                alert(`Error loading file: ${err.message}`);
+            }
+        }
+
+        // Get the filename from url
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // When the dom completely loads, show file if it exists
+        window.addEventListener('DOMContentLoaded', () => {
+            const fileName = getQueryParam('file');
+            if (fileName) {
+                loadFileFromServer(fileName);
+            }
+        });
+
+
+        //----------------------------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------------------------------------
+
+
+
+
+        // This function checks which modal we at
+        // Then changes it to the other one
+        function changeModal() {
+            if (mode === 0) {
+                showDisplayScreen();
+                mode = 1;
+            } else {
+                showListCreationScreen();
+                mode = 0;
+            }
+        }
+
+        // To modify if the user wants to
+        // -1 move back a card
+        // 0 flip the current card
+        // 1 move to the next card
+        function changeCard(val) {
+            if (val === 0) {
+                if (curFlipped === 0) {
+                    let keys = Object.keys(cardList);           
+                    let firstKey = keys[curWord];               
+                    let firstValue = cardList[firstKey];        
+                    document.getElementById("curWord").textContent = firstValue;      // show "uno"
+                    document.getElementById("wordFace").textContent = "Definition";   // show "one"
+                    curFlipped = 1;
+                }
+                else {
+                    let keys = Object.keys(cardList);           
+                    let firstKey = keys[curWord];                       
+                    document.getElementById("curWord").textContent = firstKey;      // show "uno"
+                    document.getElementById("wordFace").textContent = "Word";   // show "one"
+                    curFlipped = 0;
+                }
+            }
+
+            if (val === 1) {
+                if (curWord + 1 < Object.keys(cardList).length) {
+                    curWord += 1;
+                }
+                else curWord = 0;
+
+                let keys = Object.keys(cardList);           
+                let firstKey = keys[curWord];                       
+                document.getElementById("curWord").textContent = firstKey;      // show "uno"
+                document.getElementById("wordFace").textContent = "Word";   // show "one"
+                curFlipped = 0;
+            }
+
+            if (val === -1) {
+                if (curWord - 1 > -1) {
+                    curWord -= 1;
+                }
+                else curWord = Object.keys(cardList).length - 1;
+
+                let keys = Object.keys(cardList);           
+                let firstKey = keys[curWord];                       
+                document.getElementById("curWord").textContent = firstKey;      // show "uno"
+                document.getElementById("wordFace").textContent = "Word";   // show "one"
+                curFlipped = 0;
+            }
+
+            document.getElementById("cardNumber").textContent = curWord.toString();
+        }
+
+        // Displays the study modal (turns other off)
+        function showListCreationScreen() {
+            document.getElementById("studyModal").style.display = "none";
+            document.getElementById("creationModal").style.display = "block";
+        }
+
+        // Displays the study deck (turns other off)
+        function showDisplayScreen() {
+            document.getElementById("creationModal").style.display = "none";
+            document.getElementById("studyModal").style.display = "block";
+
+            // Get the first word and display it
+            let keys = Object.keys(cardList);
+            let firstKey = keys[0];               
+            document.getElementById("curWord").textContent = firstKey;      // show "uno"
+        }
+
+        // If like a get request, try to get study deck from the server
+        function GetListFromServer() {
+            return;
+        }
+
+        // The functiom that loads with the page
+        // Basically display the creation screen if there isn't an aready existing list
+        function OnLoad() {
+            GetListFromServer();
+            if (Object.keys(cardList).length > 0) {
+                showDisplayScreen();
+                mode = 1;
+            }
+            else showListCreationScreen();
+        }
+    </script>
+
 </body>
 </html>

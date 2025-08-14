@@ -127,7 +127,25 @@
             displayName = displayName.substring(0, 10) + '…';
           }
 
+          
           let fileType = (!fileParts[2] || fileParts[2] === 'NA') ? 'basic' : fileParts[2];
+          let route;
+
+          switch (fileType.toLowerCase()) {
+            case 'basic':
+              route = '/BasicText';
+              break;
+            case 'flash':
+              route = '/FlashCardText';
+              break;
+            case 'map':
+              route = '/MapText';
+              break;
+            default:
+              route = '/BasicText'; // fallback
+          }
+
+          link.href = `${route}?file=${encodeURIComponent(`${fileParts[0]}/${fileParts[1]}`)}`;
 
           link.innerHTML = `
             <div>
@@ -140,7 +158,16 @@
 
           // For folders, the argument is passed
 
-          link.href = `/BasicText?file=${encodeURIComponent(`${fileParts[0]}/${fileParts[1]}`)}`; // remove the fileType
+          
+
+
+
+
+
+
+
+
+
 
           // Button for options
           const optionsBtn = document.createElement('button');
