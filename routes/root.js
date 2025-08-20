@@ -39,7 +39,7 @@ router.get('/BasicText', (req, res) => {
 router.get('/FlashCardText', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'FlashCardText.html'));
 });
-router.get('/flashcard', (req, res) => {
+router.get('/flashCard', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'flashcard.html'));
 });
 
