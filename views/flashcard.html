@@ -103,11 +103,11 @@ button {
 
     // Basic scaffold for flashcard behavior
 
-const flashcards = {
-   "What is JavaScript?": "A programming language for the web." ,
-   "What is a closure?" : "A function with preserved data from its lexical scope." };
+let flashcards = [
+   {question : "What is JavaScript?", answer: "A programming language for the web." },
+   {question :"What is a closure?", answer:  "A function with preserved data from its lexical scope." }
   // Add more cards here
-
+];
 let currentIndex = 0;
 
 
@@ -277,7 +277,7 @@ let currentFileName = "FlashSaveTestingBAby";
                     dateCreated: new Date().toISOString(),  // !!! !!! !!! please fix so only when file is new
                     lastEdited: new Date().toISOString(),
                     lastEditor: "",
-                    fileData: jsonData.content // object
+                    fileData: flashcards // object
                 })
                 });
 
@@ -326,10 +326,9 @@ let currentFileName = "FlashSaveTestingBAby";
 
                 // Instead of calling undefined loadStyledContent:
                 // Update the global cardList with loaded data
-                cardList = content.fileContent || content;
+                flashcards = content.fileContent || content;
 
-                // Show the study screen after loading
-                showDisplayScreen();
+                
             } catch (err) {
                 alert(`Error loading file: ${err.message}`);
             }
