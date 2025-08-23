@@ -70,12 +70,21 @@ button {
   font-size: 16px;
 }
 
+#HomeBtn {
+  position:fixed;
+  top: 15px;
+  left: 15px;
+}
 
 </style>
+
 
 </head>
 <body>
 
+  <button onclick="window.location.href = 'textZone'" id="HomeBtn">
+  Return to Home
+  </button>
   <div class="container">
     <div class="card">
       <div class="card-inner" id="flashcard">
@@ -117,18 +126,18 @@ const backEl = flashcardEl.querySelector('.back');
 
 function renderCard(index) {
 
-  if ( flashcards.length === 0)
-{
-
-}
-
+  
+  
+  if ( flashcards.length > 0)
+  {
   const card = flashcards[index];
   frontEl.textContent = card.question;
   backEl.textContent = card.answer;
+  }
+
 }
 
-// Initial card render
-renderCard(currentIndex);
+
 
 document.getElementById('flipBtn').addEventListener('click', () => {
   document.querySelector('.card').classList.toggle('flipped');
@@ -218,6 +227,12 @@ document.getElementById('addBtn').addEventListener('click', () => {
   const word = document.getElementById('addWordInfoBox').value;
   const definition = document.getElementById('addDefInfoBox').value;
 
+  if (word === "" || definition === "")
+  {
+    alert("Fill in the word/defintion boxes to add as flashcard");
+  }
+  else
+  {
   if (flashcards[0].question === "" && flashcards[0].answer === "")  
   {
     flashcards[0] = {question : word, answer : definition};
@@ -226,15 +241,18 @@ document.getElementById('addBtn').addEventListener('click', () => {
   else
   {
     flashcards.push({question : word, answer : definition});
+    currentIndex = flashcards.length - 1;
+    renderCard(currentIndex);
   }
   
-  
+  }
   
   });
 
 });
 
-let currentFileName = "FlashSaveTestingBAby";
+
+let currentFileName = "Default name";
 // could have save button if are sending shit to a DB but don't know yet, don't know the JSON shit either 
  // puts the global 'flashcards' array into a json object (no name, just word : defintion)
         async function getFlashCardDeckJson() {
@@ -250,6 +268,11 @@ let currentFileName = "FlashSaveTestingBAby";
             }
             */
 
+            currentFileName = prompt("Enter File name", currentFileName);
+            if (flashcards.length === 0)
+            {
+              alert("Flashcard must contain at least 1 word/def to be saved");
+            }
             const token = await refreshToken();
             if (!token) {
                 if (confirm('You need to login to save. Return to login screen?')) {
@@ -328,6 +351,12 @@ let currentFileName = "FlashSaveTestingBAby";
                 // Update the global cardList with loaded data
                 flashcards = content.fileContent || content;
 
+                // rendering the card AFTER the info is obtained from the server
+                if(flashcards.length > 0 )
+                {
+                  currentIndex = 0;
+                  renderCard(currentIndex);
+                }
                 
             } catch (err) {
                 alert(`Error loading file: ${err.message}`);
@@ -345,6 +374,8 @@ let currentFileName = "FlashSaveTestingBAby";
             const fileName = getQueryParam('file');
             if (fileName) {
                 loadFileFromServer(fileName);
+                
+                
             }
         });
 
@@ -362,9 +393,6 @@ document.getElementById('createBtn').addEventListener('click', () => {
 
   
 });
-
-
-
 
 
 
